@@ -14,7 +14,9 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { ApiError, login } from "@/lib/api"
+import { ApiError, devLogin, login } from "@/lib/api"
+
+const isDev = process.env.NODE_ENV === "development"
 
 export default function LoginPage() {
   const router = useRouter()
@@ -36,6 +38,18 @@ export default function LoginPage() {
           ? "E-mail ou senha inválidos"
           : "Não foi possível entrar. Tente novamente."
       )
+      setLoading(false)
+    }
+  }
+
+  async function handleDevLogin() {
+    setError(null)
+    setLoading(true)
+    try {
+      await devLogin()
+      router.push("/punter")
+    } catch {
+      setError("Dev login indisponível (só funciona em ambiente de desenvolvimento).")
       setLoading(false)
     }
   }
@@ -76,6 +90,17 @@ export default function LoginPage() {
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? "Entrando..." : "Entrar"}
             </Button>
+            {isDev && (
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full border-dashed"
+                disabled={loading}
+                onClick={handleDevLogin}
+              >
+                Entrar como dev
+              </Button>
+            )}
             <p className="text-sm text-muted-foreground">
               Não tem conta?{" "}
               <Link href="/register" className="text-foreground underline underline-offset-4">

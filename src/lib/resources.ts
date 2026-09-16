@@ -1,4 +1,4 @@
-import { apiFetch } from "@/lib/api"
+import { apiFetch, apiUpload } from "@/lib/api"
 
 export interface Paginated<T> {
   meta: {
@@ -14,6 +14,8 @@ export interface AccountBalance {
   deposits: number
   withdrawals: number
   profit: number
+  extractedFreebets: number
+  pendingFreebets: number
   balance: number
 }
 
@@ -78,6 +80,9 @@ export const BET_RESULTS = [
 
 export type BetResult = (typeof BET_RESULTS)[number]
 
+export type FreebetTrigger = "on_loss" | "on_win" | "always"
+export type FreebetStatus = "pending" | "extracted" | "discarded"
+
 export interface Bet {
   id: number
   bookmakerAccountId: number
@@ -96,6 +101,11 @@ export interface Bet {
   result: BetResult
   cashoutAmount: number | null
   profitAmount: number | null
+  isFreebet: boolean
+  generatesFreebet: boolean
+  freebetValue: number | null
+  freebetExtraction: number | null
+  freebetTrigger: FreebetTrigger | null
   placedAt: string
   settledAt: string | null
   notes: string | null
@@ -103,6 +113,48 @@ export interface Bet {
   tipster?: Tipster | null
   method?: Method | null
   market?: Market | null
+}
+
+export interface Freebet {
+  id: number
+  bookmakerAccountId: number
+  sourceBetId: number | null
+  value: number
+  extractionRate: number
+  extractedValue: number
+  trigger: FreebetTrigger
+  status: FreebetStatus
+  createdAt: string
+  resolvedAt: string | null
+  account?: Account
+  sourceBet?: Bet | null
+}
+
+export interface BetImageAnalysisLeg {
+  selection: string | null
+  marketName: string | null
+  odd: number | null
+  stakeAmount: number | null
+  bookmaker: string | null
+  type: "back" | "lay" | null
+}
+
+export interface BetImageAnalysisResult {
+  isBet: boolean
+  bookmaker?: string | null
+  warnings?: string[]
+  metadata?: { model: string; durationMs: number; cacheHit: boolean; inputTokens: number; outputTokens: number; thinkingTokens: number; attempts: number }
+  event: string | null
+  selection: string | null
+  marketName: string | null
+  odd: number | null
+  units: number | null
+  stakeAmount: number | null
+  sport: string | null
+  competition: string | null
+  placedAt: string | null
+  notes: string | null
+  legs: BetImageAnalysisLeg[]
 }
 
 export interface StatsSummary {
@@ -220,6 +272,14 @@ export const resources = {
   bets: {
     list: (filters: BetFilters = {}) =>
       apiFetch<Paginated<Bet>>(`/bets${buildQuery(filters)}`),
+    analyzeImage: (image: File | null, contextText?: string, options?: { mode?: "punter" | "surebet"; signal?: AbortSignal }) => {
+      const formData = new FormData()
+      if (image) formData.append("image", image)
+      if (contextText) formData.append("contextText", contextText)
+      formData.append("mode", options?.mode ?? "punter")
+      formData.append("timeZone", Intl.DateTimeFormat().resolvedOptions().timeZone)
+      return apiUpload<BetImageAnalysisResult>("/bets/analyze-image", formData, options?.signal)
+    },
     create: (data: Record<string, unknown>) =>
       apiFetch<Bet>("/bets", { method: "POST", body: JSON.stringify(data) }),
     update: (id: number, data: Record<string, unknown>) =>
@@ -230,6 +290,16 @@ export const resources = {
         body: JSON.stringify({ result, cashoutAmount }),
       }),
     remove: (id: number) => apiFetch<void>(`/bets/${id}`, { method: "DELETE" }),
+  },
+  freebets: {
+    list: (status?: FreebetStatus) =>
+      apiFetch<Freebet[]>(`/freebets${buildQuery({ status })}`),
+    extract: (id: number) =>
+      apiFetch<Freebet>(`/freebets/${id}/extract`, { method: "PATCH" }),
+    discard: (id: number) =>
+      apiFetch<Freebet>(`/freebets/${id}/discard`, { method: "PATCH" }),
+    reopen: (id: number) =>
+      apiFetch<Freebet>(`/freebets/${id}/reopen`, { method: "PATCH" }),
   },
   settings: {
     get: () => apiFetch<{ unitValue: number }>("/me/settings"),

@@ -65,11 +65,40 @@ export async function apiFetch<T>(path: string, options: RequestInit = {}): Prom
   return response.json()
 }
 
+export async function apiUpload<T>(path: string, formData: FormData, signal?: AbortSignal): Promise<T> {
+  const token = getToken()
+  const response = await fetch(`${API_URL}${path}`, {
+    method: "POST",
+    headers: {
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: formData,
+    signal,
+  })
+
+  if (!response.ok) {
+    let message = "Algo deu errado. Tente novamente."
+    try {
+      const body = await response.json()
+      message = body?.errors?.[0]?.message ?? body?.message ?? message
+    } catch {}
+    throw new ApiError(response.status, message)
+  }
+
+  return response.json()
+}
+
 export async function login(email: string, password: string) {
   const data = await apiFetch<AuthResponse>("/auth/login", {
     method: "POST",
     body: JSON.stringify({ email, password }),
   })
+  setToken(data.token.value)
+  return data.user
+}
+
+export async function devLogin() {
+  const data = await apiFetch<AuthResponse>("/auth/dev-login", { method: "POST" })
   setToken(data.token.value)
   return data.user
 }

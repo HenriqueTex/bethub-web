@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { toast } from "sonner"
 import {
   Card,
@@ -17,11 +17,42 @@ import { resources, Method, StatsSummary } from "@/lib/resources"
 interface MethodSpaceProps {
   methodName: string
   tagline: string
+  featuredCreateForm?: boolean
+  createFormVariant?: "punter" | "surebet"
+  summaryCurrentMonth?: boolean
 }
 
-export default function MethodSpace({ methodName, tagline }: MethodSpaceProps) {
+function toDateOnly(date: Date) {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, "0")
+  const day = String(date.getDate()).padStart(2, "0")
+  return `${year}-${month}-${day}`
+}
+
+function getCurrentMonthRange() {
+  const now = new Date()
+  const from = new Date(now.getFullYear(), now.getMonth(), 1)
+  const to = new Date(now.getFullYear(), now.getMonth() + 1, 0)
+  return {
+    from: toDateOnly(from),
+    to: toDateOnly(to),
+    label: new Intl.DateTimeFormat("pt-BR", {
+      month: "long",
+      year: "numeric",
+    }).format(now),
+  }
+}
+
+export default function MethodSpace({
+  methodName,
+  tagline,
+  featuredCreateForm = false,
+  createFormVariant,
+  summaryCurrentMonth = false,
+}: MethodSpaceProps) {
   const [method, setMethod] = useState<Method | null>(null)
   const [summary, setSummary] = useState<StatsSummary | null>(null)
+  const currentMonth = useMemo(() => getCurrentMonthRange(), [])
 
   useEffect(() => {
     resources.methods
@@ -38,10 +69,14 @@ export default function MethodSpace({ methodName, tagline }: MethodSpaceProps) {
   const reloadSummary = useCallback(() => {
     if (!method) return
     resources.stats
-      .summary({ methodId: method.id })
+      .summary({
+        methodId: method.id,
+        from: summaryCurrentMonth ? currentMonth.from : undefined,
+        to: summaryCurrentMonth ? currentMonth.to : undefined,
+      })
       .then(setSummary)
       .catch(() => toast.error("Erro ao carregar estatísticas"))
-  }, [method])
+  }, [currentMonth.from, currentMonth.to, method, summaryCurrentMonth])
 
   useEffect(() => {
     reloadSummary()
@@ -55,10 +90,10 @@ export default function MethodSpace({ methodName, tagline }: MethodSpaceProps) {
 
   return (
     <div className="space-y-6">
-      <div className="mx-auto grid max-w-6xl gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="mx-auto grid max-w-6xl grid-cols-2 gap-2 sm:gap-4 xl:grid-cols-4 [&>div]:min-w-0 [&_[data-slot=card-header]]:px-3 [&_[data-slot=card-content]]:px-3 sm:[&_[data-slot=card-header]]:px-6 sm:[&_[data-slot=card-content]]:px-6">
         <Card className="py-4">
           <CardHeader className="pb-0">
-            <CardDescription>{tagline}</CardDescription>
+            <CardDescription>{summaryCurrentMonth ? "Lucro no mês" : tagline}</CardDescription>
             <CardTitle
               className={cn(
                 "text-2xl",
@@ -69,7 +104,8 @@ export default function MethodSpace({ methodName, tagline }: MethodSpaceProps) {
             </CardTitle>
           </CardHeader>
           <CardContent className="text-xs text-muted-foreground">
-            lucro total · {summary ? `${summary.profitUnits > 0 ? "+" : ""}${summary.profitUnits}u` : "—"}
+            {summaryCurrentMonth ? currentMonth.label : "lucro total"} ·{" "}
+            {summary ? `${summary.profitUnits > 0 ? "+" : ""}${summary.profitUnits}u` : "—"}
           </CardContent>
         </Card>
         <Card className="py-4">
@@ -79,6 +115,7 @@ export default function MethodSpace({ methodName, tagline }: MethodSpaceProps) {
           </CardHeader>
           <CardContent className="text-xs text-muted-foreground">
             sobre {formatBRL(summary?.staked)} apostados
+            {summaryCurrentMonth ? " no mês" : ""}
           </CardContent>
         </Card>
         <Card className="py-4">
@@ -88,6 +125,7 @@ export default function MethodSpace({ methodName, tagline }: MethodSpaceProps) {
           </CardHeader>
           <CardContent className="text-xs text-muted-foreground">
             {summary?.wins ?? 0} greens · {summary?.losses ?? 0} reds
+            {summaryCurrentMonth ? " no mês" : ""}
           </CardContent>
         </Card>
         <Card className="py-4">
@@ -97,11 +135,18 @@ export default function MethodSpace({ methodName, tagline }: MethodSpaceProps) {
           </CardHeader>
           <CardContent className="text-xs text-muted-foreground">
             {formatBRL(summary?.pendingStake)} em jogo
+            {summaryCurrentMonth ? " no mês" : ""}
           </CardContent>
         </Card>
       </div>
 
-      <BetsView title={methodName} lockedMethod={method} onDataChanged={reloadSummary} />
+      <BetsView
+        title={methodName}
+        lockedMethod={method}
+        featuredCreateForm={featuredCreateForm}
+        createFormVariant={createFormVariant}
+        onDataChanged={reloadSummary}
+      />
     </div>
   )
 }

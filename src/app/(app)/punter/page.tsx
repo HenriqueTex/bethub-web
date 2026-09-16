@@ -3,5 +3,13 @@
 import MethodSpace from "@/components/method-space"
 
 export default function PunterPage() {
-  return <MethodSpace methodName="Punter" tagline="Apostas por análise" />
+  return (
+    <MethodSpace
+      methodName="Punter"
+      tagline="Apostas por análise"
+      featuredCreateForm
+      createFormVariant="punter"
+      summaryCurrentMonth
+    />
+  )
 }

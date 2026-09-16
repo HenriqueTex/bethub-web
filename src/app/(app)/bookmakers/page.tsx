@@ -211,6 +211,7 @@ export default function BookmakersPage() {
                       <TableHead className="text-right">Depósitos</TableHead>
                       <TableHead className="text-right">Saques</TableHead>
                       <TableHead className="text-right">Lucro</TableHead>
+                      <TableHead className="text-right">Freebets</TableHead>
                       <TableHead className="text-right">Saldo</TableHead>
                       <TableHead className="w-28" />
                     </TableRow>
@@ -241,6 +242,13 @@ export default function BookmakersPage() {
                           )}
                         >
                           {formatSigned(account.balance?.profit)}
+                        </TableCell>
+                        <TableCell className="text-right text-amber-500">
+                          {account.balance?.pendingFreebets
+                            ? `${formatBRL(account.balance.pendingFreebets)} a extrair`
+                            : account.balance?.extractedFreebets
+                              ? formatBRL(account.balance.extractedFreebets)
+                              : "—"}
                         </TableCell>
                         <TableCell className="text-right font-semibold">
                           {formatBRL(account.balance?.balance)}
