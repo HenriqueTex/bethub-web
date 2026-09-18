@@ -1,8 +1,9 @@
 "use client"
 
-import { FormEvent, useEffect, useState } from "react"
+import { FormEvent, useEffect, useMemo, useState } from "react"
+import Image from "next/image"
 import { toast } from "sonner"
-import { ArrowDownToLine, ArrowUpFromLine, Plus, Trash2, Wallet } from "lucide-react"
+import { ArrowDownToLine, ArrowUpFromLine, Plus, Search, Trash2, Wallet } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import {
@@ -37,9 +38,38 @@ import {
 import { formatBRL, formatDate, formatSigned } from "@/lib/format"
 import { cn } from "@/lib/utils"
 import { resources, Account, Bookmaker, Transaction } from "@/lib/resources"
+import { bookmakerLogo } from "@/lib/bookmaker-logos"
+
+type StatusFilter = "all" | "with" | "without" | "inactive"
+
+function BookmakerLogo({ name }: { name: string }) {
+  const src = bookmakerLogo(name)
+
+  if (!src) {
+    return (
+      <span className="flex size-9 shrink-0 items-center justify-center rounded-md bg-muted text-xs font-semibold text-muted-foreground">
+        {name.slice(0, 2).toUpperCase()}
+      </span>
+    )
+  }
+
+  return (
+    <Image
+      src={src}
+      alt=""
+      aria-hidden
+      width={36}
+      height={36}
+      unoptimized
+      className="size-9 shrink-0 rounded-md object-contain"
+    />
+  )
+}
 
 export default function BookmakersPage() {
   const [bookmakers, setBookmakers] = useState<Bookmaker[]>([])
+  const [search, setSearch] = useState("")
+  const [status, setStatus] = useState<StatusFilter>("all")
   const [loading, setLoading] = useState(true)
   const [bookmakerDialog, setBookmakerDialog] = useState(false)
   const [accountDialog, setAccountDialog] = useState<Bookmaker | null>(null)
@@ -55,6 +85,21 @@ export default function BookmakersPage() {
   useEffect(() => {
     reload().catch(() => toast.error("Erro ao carregar casas"))
   }, [])
+
+  const filtered = useMemo(() => {
+    const term = search.trim().toLowerCase()
+
+    return bookmakers.filter((bookmaker) => {
+      if (term && !bookmaker.name.toLowerCase().includes(term)) return false
+
+      const accounts = bookmaker.accounts?.length ?? 0
+      if (status === "with") return accounts > 0
+      if (status === "without") return accounts === 0
+      if (status === "inactive") return !bookmaker.active
+
+      return true
+    })
+  }, [bookmakers, search, status])
 
   async function openTransactions(account: Account) {
     setTxAccount(account)
@@ -161,6 +206,35 @@ export default function BookmakersPage() {
         </Button>
       </div>
 
+      <div className="flex flex-col gap-2 sm:flex-row">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder="Buscar casa..."
+            className="pl-9"
+          />
+        </div>
+        <Select value={status} onValueChange={(value) => setStatus(value as StatusFilter)}>
+          <SelectTrigger className="sm:w-52">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todas</SelectItem>
+            <SelectItem value="with">Com conta</SelectItem>
+            <SelectItem value="without">Sem conta</SelectItem>
+            <SelectItem value="inactive">Inativas</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      {!loading && bookmakers.length > 0 && (
+        <p className="text-sm text-muted-foreground">
+          {filtered.length} de {bookmakers.length} casas
+        </p>
+      )}
+
       {loading ? (
         <p className="text-muted-foreground">Carregando...</p>
       ) : bookmakers.length === 0 ? (
@@ -170,11 +244,18 @@ export default function BookmakersPage() {
             conta nela.
           </CardContent>
         </Card>
+      ) : filtered.length === 0 ? (
+        <Card>
+          <CardContent className="py-10 text-center text-muted-foreground">
+            Nenhuma casa encontrada com esses filtros.
+          </CardContent>
+        </Card>
       ) : (
-        bookmakers.map((bookmaker) => (
+        filtered.map((bookmaker) => (
           <Card key={bookmaker.id} className={cn(!bookmaker.active && "opacity-60")}>
             <CardHeader className="flex-row items-center justify-between">
               <div className="flex items-center gap-3">
+                <BookmakerLogo name={bookmaker.name} />
                 <CardTitle className="text-lg">{bookmaker.name}</CardTitle>
                 {!bookmaker.active && <Badge variant="secondary">Inativa</Badge>}
               </div>
