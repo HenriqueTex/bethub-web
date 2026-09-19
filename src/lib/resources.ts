@@ -217,6 +217,34 @@ export function buildQuery(filters: Record<string, unknown>) {
   return query ? `?${query}` : ""
 }
 
+export type CostKind = "one_time" | "monthly"
+
+export interface Cost {
+  id: number
+  description: string
+  amount: number
+  kind: CostKind
+  startsOn: string
+  endsOn: string | null
+  notes: string | null
+  tipsters?: Tipster[]
+}
+
+export interface CostSummary {
+  total: number
+  byTipster: Record<string, number>
+  costs: {
+    id: number
+    description: string
+    kind: CostKind
+    amount: number
+    occurrences: number
+    total: number
+    tipsterIds: number[]
+    perTipster: number
+  }[]
+}
+
 export const resources = {
   bookmakers: {
     list: () => apiFetch<Bookmaker[]>("/bookmakers"),
@@ -246,6 +274,21 @@ export const resources = {
         body: JSON.stringify(data),
       }),
     remove: (id: number) => apiFetch<void>(`/transactions/${id}`, { method: "DELETE" }),
+  },
+  costs: {
+    list: () => apiFetch<Cost[]>("/costs"),
+    summary: (params?: { from?: string; to?: string }) => {
+      const qs = new URLSearchParams()
+      if (params?.from) qs.set("from", params.from)
+      if (params?.to) qs.set("to", params.to)
+      const suffix = qs.toString() ? `?${qs}` : ""
+      return apiFetch<CostSummary>(`/costs/summary${suffix}`)
+    },
+    create: (data: Record<string, unknown>) =>
+      apiFetch<Cost>("/costs", { method: "POST", body: JSON.stringify(data) }),
+    update: (id: number, data: Record<string, unknown>) =>
+      apiFetch<Cost>(`/costs/${id}`, { method: "PUT", body: JSON.stringify(data) }),
+    remove: (id: number) => apiFetch<unknown>(`/costs/${id}`, { method: "DELETE" }),
   },
   tipsters: {
     list: () => apiFetch<Tipster[]>("/tipsters"),
@@ -280,6 +323,12 @@ export const resources = {
       formData.append("timeZone", Intl.DateTimeFormat().resolvedOptions().timeZone)
       return apiUpload<BetImageAnalysisResult>("/bets/analyze-image", formData, options?.signal)
     },
+    uploadReceipt: (image: File) => {
+      const formData = new FormData()
+      formData.append("image", image)
+      return apiUpload<{ receiptKey: string }>("/bets/receipts", formData)
+    },
+    receiptUrl: (id: number) => apiFetch<{ url: string }>(`/bets/${id}/receipt`),
     create: (data: Record<string, unknown>) =>
       apiFetch<Bet>("/bets", { method: "POST", body: JSON.stringify(data) }),
     update: (id: number, data: Record<string, unknown>) =>

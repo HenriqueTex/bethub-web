@@ -1588,7 +1588,7 @@ export default function BetsView({
     setFilters((current) => ({ ...current, [key]: value === "all" ? "" : value }))
   }
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>, receipt?: File | null) {
     event.preventDefault()
     const formElement = event.currentTarget
     const form = new FormData(formElement)
@@ -1632,6 +1632,15 @@ export default function BetsView({
         setEditing(null)
         setEditUnits("1")
       } else {
+        if (receipt) {
+          try {
+            const { receiptKey } = await resources.bets.uploadReceipt(receipt)
+            payload.receiptKey = receiptKey
+          } catch {
+            // o comprovante é acessório: perder o upload não pode custar a aposta
+            toast.warning("Aposta salva, mas não foi possível guardar o comprovante")
+          }
+        }
         await resources.bets.create(payload)
         toast.success("Aposta registrada")
         setCreateUnits("1")

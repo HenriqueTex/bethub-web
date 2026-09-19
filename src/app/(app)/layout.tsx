@@ -10,6 +10,7 @@ import {
   Landmark,
   LogOut,
   Megaphone,
+  Receipt,
   Menu,
   PanelLeftClose,
   PanelLeftOpen,
@@ -40,6 +41,7 @@ const NAV = [
   { href: "/bookmakers", label: "Casas & Contas", icon: Landmark },
   { href: "/freebets", label: "Freebets", icon: Gift },
   { href: "/tipsters", label: "Tipsters", icon: Megaphone },
+  { href: "/costs", label: "Custos", icon: Receipt },
   { href: "/settings", label: "Configurações", icon: Settings }
 ]
 

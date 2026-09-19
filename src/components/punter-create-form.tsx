@@ -35,7 +35,7 @@ interface Props {
   ready: boolean
   saving: boolean
   carryOver?: PunterCarryOver
-  onSubmit: (event: FormEvent<HTMLFormElement>) => void
+  onSubmit: (event: FormEvent<HTMLFormElement>, receipt?: File | null) => void
 }
 
 const selectClass =
@@ -103,6 +103,7 @@ export function PunterCreateForm({
     initialPunterDraft
   )
   const [freebet, setFreebet] = useState(emptyFreebet)
+  const [receipt, setReceipt] = useState<File | null>(null)
   const [loading, setLoading] = useState(false)
   const [status, setStatus] = useState("")
   const [error, setError] = useState("")
@@ -143,6 +144,7 @@ export function PunterCreateForm({
 
   async function analyze(file: File | null, text?: string) {
     cancelAnalysis()
+    setReceipt(file)
     const id = request.current.id
     const controller = new AbortController()
     request.current.controller = controller
@@ -265,7 +267,7 @@ export function PunterCreateForm({
       return
     }
     cancelAnalysis()
-    onSubmit(event)
+    onSubmit(event, receipt)
   }
 
   return (
