@@ -41,10 +41,27 @@ export function BetImportInput({
   const [crop, setCrop] = useState<ImageCrop>(fullImageCrop)
   const input = useRef<HTMLInputElement>(null)
   const generation = useRef(0)
+  const pasteHandler = useRef<(file: File) => void>(() => {})
 
   useEffect(() => {
     if (preview) return () => URL.revokeObjectURL(preview)
   }, [preview])
+  useEffect(() => {
+    pasteHandler.current = selectFile
+  })
+  useEffect(() => {
+    function onPaste(event: ClipboardEvent) {
+      if (disabled) return
+      const image = Array.from(event.clipboardData?.files ?? []).find((item) =>
+        item.type.startsWith("image/")
+      )
+      if (!image) return
+      event.preventDefault()
+      pasteHandler.current(image)
+    }
+    document.addEventListener("paste", onPaste)
+    return () => document.removeEventListener("paste", onPaste)
+  }, [disabled])
   useEffect(
     () => () => {
       generation.current++
@@ -67,22 +84,18 @@ export function BetImportInput({
       setPreview(URL.createObjectURL(next))
       setCrop(fullImageCrop)
       setSource("image")
+      analyzeImage(next, fullImageCrop)
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Imagem inválida.")
     }
   }
 
-  async function analyze() {
+  async function analyzeImage(target: File, area: ImageCrop) {
     setError("")
-    if (source === "text") {
-      onAnalyze(null, text)
-      return
-    }
-    if (!file) return
     const current = ++generation.current
     setPreparing(true)
     try {
-      const prepared = await prepareBetImage(file, crop)
+      const prepared = await prepareBetImage(target, area)
       if (current === generation.current) onAnalyze(prepared)
     } catch (cause) {
       if (current === generation.current)
@@ -100,16 +113,6 @@ export function BetImportInput({
     <section
       aria-label="Importar aposta"
       className="min-w-0 space-y-3 rounded-lg border bg-muted/20 p-3"
-      onPaste={(event) => {
-        if (disabled) return
-        const image = Array.from(event.clipboardData.files).find((item) =>
-          item.type.startsWith("image/")
-        )
-        if (image) {
-          event.preventDefault()
-          selectFile(image)
-        }
-      }}
     >
       <div className="flex gap-2" aria-label="Origem da importação">
         {(["image", "text"] as const).map((value) => (
@@ -207,8 +210,8 @@ export function BetImportInput({
           )}
           <p className="text-xs text-muted-foreground">
             {Object.values(crop).some((value) => value > 0)
-              ? "Recorte aplicado. Somente a área selecionada será enviada."
-              : "PNG, JPG ou WebP, até 10 MB. Recorte o comprovante antes de ler."}
+              ? "Recorte aplicado. Somente a área selecionada foi enviada."
+              : "PNG, JPG ou WebP, até 10 MB. A leitura começa assim que a imagem é carregada."}
           </p>
         </>
       ) : (
@@ -250,15 +253,20 @@ export function BetImportInput({
           </Button>
         </div>
       ) : (
-        <Button
-          type="button"
-          variant="outline"
-          className="w-full"
-          disabled={disabled || (source === "image" ? !file : !text.trim())}
-          onClick={analyze}
-        >
-          {source === "image" ? "Ler imagem" : "Preencher pelo texto"}
-        </Button>
+        source === "text" && (
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full"
+            disabled={disabled || !text.trim()}
+            onClick={() => {
+              setError("")
+              onAnalyze(null, text)
+            }}
+          >
+            Preencher pelo texto
+          </Button>
+        )
       )}
       <p className="text-xs text-muted-foreground">
         O preenchimento manual continua disponível.
@@ -328,8 +336,14 @@ export function BetImportInput({
             >
               Restaurar
             </Button>
-            <Button type="button" onClick={() => setCropOpen(false)}>
-              Usar recorte
+            <Button
+              type="button"
+              onClick={() => {
+                setCropOpen(false)
+                if (file) analyzeImage(file, crop)
+              }}
+            >
+              Usar recorte e reler
             </Button>
           </div>
         </DialogContent>

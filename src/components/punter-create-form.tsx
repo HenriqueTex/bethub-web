@@ -349,33 +349,58 @@ export function PunterCreateForm({
               ))}
             </ul>
           )}
-          <div className="grid gap-2">
-            <Label htmlFor="create-bet-account">
-              Conta{" "}
-              {draft.imported.bookmakerAccountId && (
-                <span className="text-xs text-emerald-600">
-                  Sugerida pela imagem
-                </span>
-              )}
-            </Label>
-            <select
-              id="create-bet-account"
-              name="bookmakerAccountId"
-              required
-              value={fields.bookmakerAccountId}
-              onChange={(event) =>
-                edit("bookmakerAccountId", event.target.value)
-              }
-              className={selectClass}
-            >
-              <option value="">Selecione a conta</option>
-              {activeAccounts.map((account) => (
-                <option key={account.id} value={account.id}>
-                  {account.bookmaker?.name}
-                  {account.label ? " — " + account.label : ""}
-                </option>
-              ))}
-            </select>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid gap-2">
+              <Label htmlFor="create-bet-account">
+                Conta{" "}
+                {draft.imported.bookmakerAccountId && (
+                  <span className="text-xs text-emerald-600">
+                    Sugerida pela imagem
+                  </span>
+                )}
+              </Label>
+              <select
+                id="create-bet-account"
+                name="bookmakerAccountId"
+                required
+                value={fields.bookmakerAccountId}
+                onChange={(event) =>
+                  edit("bookmakerAccountId", event.target.value)
+                }
+                className={selectClass}
+              >
+                <option value="">Selecione a conta</option>
+                {activeAccounts.map((account) => (
+                  <option key={account.id} value={account.id}>
+                    {account.bookmaker?.name}
+                    {account.label ? " — " + account.label : ""}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="create-bet-tipster">Tipster</Label>
+              <select
+                id="create-bet-tipster"
+                className={selectClass}
+                name="tipsterId"
+                value={fields.tipsterId}
+                onChange={(event) => edit("tipsterId", event.target.value)}
+              >
+                <option value="">Aposta própria</option>
+                {tipsters
+                  .filter((tipster) => tipster.active)
+                  .map((tipster) => (
+                    <option key={tipster.id} value={tipster.id}>
+                      {tipster.name}
+                    </option>
+                  ))}
+              </select>
+            </div>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            {input("placedAt", "Data da aposta", { type: "datetime-local" })}
+            {input("eventDate", "Data do jogo", { type: "datetime-local" })}
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
             {input("event", "Evento", {
@@ -495,27 +520,6 @@ export function PunterCreateForm({
                 placeholder: "Brasileirão, NBA…",
                 maxLength: 100
               })}
-              <div className="grid gap-2">
-                <Label htmlFor="create-bet-tipster">Tipster</Label>
-                <select
-                  id="create-bet-tipster"
-                  className={selectClass}
-                  name="tipsterId"
-                  value={fields.tipsterId}
-                  onChange={(event) => edit("tipsterId", event.target.value)}
-                >
-                  <option value="">Aposta própria</option>
-                  {tipsters
-                    .filter((tipster) => tipster.active)
-                    .map((tipster) => (
-                      <option key={tipster.id} value={tipster.id}>
-                        {tipster.name}
-                      </option>
-                    ))}
-                </select>
-              </div>
-              {input("eventDate", "Data do jogo", { type: "datetime-local" })}
-              {input("placedAt", "Data da aposta", { type: "datetime-local" })}
               <div className="flex items-center gap-2 text-sm">
                 <FreebetPopover value={freebet} onChange={setFreebet} />
                 <span>Esta aposta é ou gera uma freebet</span>
