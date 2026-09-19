@@ -16,9 +16,11 @@ import {
   type BetImageAnalysisResult
 } from "@/lib/resources"
 import {
+  emptyCarryOver,
   initialPunterDraft,
   punterDraftReducer,
   stakeValues,
+  type PunterCarryOver,
   type PunterFields,
   type PunterField
 } from "@/lib/punter-draft"
@@ -32,6 +34,7 @@ interface Props {
   unitValue: number
   ready: boolean
   saving: boolean
+  carryOver?: PunterCarryOver
   onSubmit: (event: FormEvent<HTMLFormElement>) => void
 }
 
@@ -91,11 +94,12 @@ export function PunterCreateForm({
   unitValue,
   ready,
   saving,
+  carryOver = emptyCarryOver,
   onSubmit
 }: Props) {
   const [draft, dispatch] = useReducer(
     punterDraftReducer,
-    undefined,
+    carryOver,
     initialPunterDraft
   )
   const [freebet, setFreebet] = useState(emptyFreebet)

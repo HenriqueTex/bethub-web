@@ -66,6 +66,7 @@ import {
   type FreebetState,
 } from "@/components/freebet-popover"
 import { PunterCreateForm } from "@/components/punter-create-form"
+import { emptyCarryOver, type PunterCarryOver } from "@/lib/punter-draft"
 import { ResultBadge } from "@/components/result-badge"
 import { formatBRL, formatDate, formatOdd, formatSigned, formatUnits, RESULT_LABELS } from "@/lib/format"
 import { cn } from "@/lib/utils"
@@ -1513,6 +1514,7 @@ export default function BetsView({
   const [cashoutBet, setCashoutBet] = useState<Bet | null>(null)
   const [saving, setSaving] = useState(false)
   const [createFormKey, setCreateFormKey] = useState(0)
+  const [carryOver, setCarryOver] = useState<PunterCarryOver>(emptyCarryOver)
   const [createUnits, setCreateUnits] = useState("1")
   const [editUnits, setEditUnits] = useState("1")
   const resolvedCreateFormVariant =
@@ -1633,6 +1635,11 @@ export default function BetsView({
         await resources.bets.create(payload)
         toast.success("Aposta registrada")
         setCreateUnits("1")
+        setCarryOver({
+          bookmakerAccountId: get("bookmakerAccountId"),
+          tipsterId: get("tipsterId"),
+          placedAt: get("placedAt")
+        })
         if (inlineCreateForm) {
           setCreateFormKey((current) => current + 1)
         } else {
@@ -1715,6 +1722,7 @@ export default function BetsView({
           unitValue={unitValue}
           ready={catalogsReady}
           saving={saving}
+          carryOver={carryOver}
           onSubmit={handleSubmit}
         />
       ) : (

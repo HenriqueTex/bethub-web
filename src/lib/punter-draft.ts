@@ -20,12 +20,25 @@ export type DraftState = {
   imported: Partial<Record<PunterField, { before: string; after: string }>>
 }
 
-export function initialPunterDraft(): DraftState {
+export type PunterCarryOver = Pick<
+  PunterFields,
+  "bookmakerAccountId" | "tipsterId" | "placedAt"
+>
+
+export const emptyCarryOver: PunterCarryOver = {
+  bookmakerAccountId: "",
+  tipsterId: "",
+  placedAt: ""
+}
+
+export function initialPunterDraft(
+  carryOver: PunterCarryOver = emptyCarryOver
+): DraftState {
   const now = new Date()
   const local = new Date(now.getTime() - now.getTimezoneOffset() * 60_000)
   return {
     fields: {
-      bookmakerAccountId: "",
+      bookmakerAccountId: carryOver.bookmakerAccountId,
       event: "",
       selection: "",
       marketName: "",
@@ -34,9 +47,9 @@ export function initialPunterDraft(): DraftState {
       amountMode: "units",
       sport: "",
       competition: "",
-      tipsterId: "",
+      tipsterId: carryOver.tipsterId,
       eventDate: "",
-      placedAt: local.toISOString().slice(0, 16),
+      placedAt: carryOver.placedAt || local.toISOString().slice(0, 16),
       notes: ""
     },
     touched: {},
