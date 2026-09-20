@@ -172,6 +172,9 @@ export interface StatsSummary {
   hitRate: number
   avgOdd: number
   totalBalance: number
+  costs: number
+  netProfit: number
+  netRoi: number
 }
 
 export interface StatsRow {
@@ -184,6 +187,10 @@ export interface StatsRow {
   profitUnits: number
   roi: number
   hitRate: number
+  /** Só vem na dimensão tipster, que é onde o rateio de custo se aplica. */
+  cost?: number
+  netProfit?: number
+  netRoi?: number
 }
 
 export interface TimelinePoint {

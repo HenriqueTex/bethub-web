@@ -114,7 +114,8 @@ export default function DashboardPage() {
       .catch(() => toast.error("Erro ao carregar ranking"))
   }, [dimension, filters])
 
-  const profitPositive = (summary?.profit ?? 0) >= 0
+  const temCusto = (summary?.costs ?? 0) > 0
+  const profitPositive = (summary?.netProfit ?? summary?.profit ?? 0) >= 0
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
@@ -141,25 +142,35 @@ export default function DashboardPage() {
             <CardTitle
               className={cn("text-2xl", profitPositive ? "text-emerald-600" : "text-rose-600")}
             >
-              {formatSigned(summary?.profit)}
+              {formatSigned(summary?.netProfit ?? summary?.profit)}
             </CardTitle>
           </CardHeader>
           <CardContent className="text-xs text-muted-foreground">
-            {summary ? `${summary.profitUnits > 0 ? "+" : ""}${summary.profitUnits}u` : "—"} ·
-            odd média {summary?.avgOdd ?? "—"}
+            {temCusto ? (
+              <>
+                {formatSigned(summary?.profit)} em apostas · custos{" "}
+                <span className="text-rose-600">-{formatBRL(summary?.costs)}</span>
+              </>
+            ) : (
+              <>
+                {summary ? `${summary.profitUnits > 0 ? "+" : ""}${summary.profitUnits}u` : "—"} ·
+                odd média {summary?.avgOdd ?? "—"}
+              </>
+            )}
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-1">
             <CardDescription>ROI / Taxa de acerto</CardDescription>
             <CardTitle className="text-2xl">
-              {summary ? `${summary.roi}%` : "—"}
+              {summary ? `${summary.netRoi ?? summary.roi}%` : "—"}
               <span className="mx-2 text-muted-foreground">·</span>
               {summary ? `${summary.hitRate}%` : "—"}
             </CardTitle>
           </CardHeader>
           <CardContent className="text-xs text-muted-foreground">
             sobre {formatBRL(summary?.staked)} apostados
+            {temCusto && ` · ${summary?.roi}% sem custos`}
           </CardContent>
         </Card>
         <Card>
@@ -281,6 +292,12 @@ export default function DashboardPage() {
                       <TableHead className="text-right">Apostas</TableHead>
                       <TableHead className="text-right">Apostado</TableHead>
                       <TableHead className="text-right">Lucro</TableHead>
+                      {option.value === "tipster" && (
+                        <>
+                          <TableHead className="text-right">Custo</TableHead>
+                          <TableHead className="text-right">Líquido</TableHead>
+                        </>
+                      )}
                       <TableHead className="text-right">Unidades</TableHead>
                       <TableHead className="text-right">ROI</TableHead>
                       <TableHead className="text-right">Acerto</TableHead>
@@ -289,7 +306,10 @@ export default function DashboardPage() {
                   <TableBody>
                     {!rankings[option.value]?.length ? (
                       <TableRow>
-                        <TableCell colSpan={7} className="text-center text-muted-foreground">
+                        <TableCell
+                          colSpan={option.value === "tipster" ? 9 : 7}
+                          className="text-center text-muted-foreground"
+                        >
                           Sem dados no período
                         </TableCell>
                       </TableRow>
@@ -309,11 +329,30 @@ export default function DashboardPage() {
                           >
                             {formatSigned(row.profit)}
                           </TableCell>
+                          {option.value === "tipster" && (
+                            <>
+                              <TableCell className="text-right text-rose-600">
+                                {row.cost ? `-${formatBRL(row.cost)}` : "—"}
+                              </TableCell>
+                              <TableCell
+                                className={cn(
+                                  "text-right font-medium",
+                                  (row.netProfit ?? row.profit) >= 0
+                                    ? "text-emerald-600"
+                                    : "text-rose-600"
+                                )}
+                              >
+                                {formatSigned(row.netProfit ?? row.profit)}
+                              </TableCell>
+                            </>
+                          )}
                           <TableCell className="text-right">
                             {row.profitUnits > 0 ? "+" : ""}
                             {row.profitUnits}u
                           </TableCell>
-                          <TableCell className="text-right">{row.roi}%</TableCell>
+                          <TableCell className="text-right">
+                            {option.value === "tipster" ? (row.netRoi ?? row.roi) : row.roi}%
+                          </TableCell>
                           <TableCell className="text-right">{row.hitRate}%</TableCell>
                         </TableRow>
                       ))
