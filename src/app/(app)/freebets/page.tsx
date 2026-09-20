@@ -76,13 +76,13 @@ export default function FreebetsPage() {
   return (
     <div className="mx-auto max-w-5xl space-y-6">
       <div className="flex items-center gap-3">
-        <Gift className="size-6 text-amber-500" />
+        <Gift className="size-6 text-warning" />
         <h1 className="text-2xl font-bold">Freebets</h1>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-amber-500">{formatBRL(total)}</CardTitle>
+          <CardTitle className="text-warning">{formatBRL(total)}</CardTitle>
           <CardDescription>
             {status === "pending"
               ? "Valor extraível das freebets pendentes (ainda não somado ao saldo)"
@@ -143,7 +143,7 @@ export default function FreebetsPage() {
                       <TableCell className="text-right text-muted-foreground">
                         {freebet.extractionRate}%
                       </TableCell>
-                      <TableCell className="text-right font-medium text-amber-500">
+                      <TableCell className="text-right font-medium text-warning">
                         {formatBRL(freebet.extractedValue)}
                       </TableCell>
                       <TableCell className="text-muted-foreground">
@@ -159,7 +159,7 @@ export default function FreebetsPage() {
                                 title="Extrair (creditar no saldo)"
                                 onClick={() => act(freebet, "extract")}
                               >
-                                <Check className="size-4 text-emerald-500" />
+                                <Check className="size-4 text-profit" />
                               </Button>
                               <Button
                                 variant="ghost"
@@ -167,7 +167,7 @@ export default function FreebetsPage() {
                                 title="Descartar"
                                 onClick={() => act(freebet, "discard")}
                               >
-                                <X className="size-4 text-rose-500" />
+                                <X className="size-4 text-loss" />
                               </Button>
                             </>
                           ) : (

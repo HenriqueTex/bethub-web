@@ -84,7 +84,7 @@ export default function TipstersPage() {
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="page-heading">
         <h1 className="text-2xl font-bold">Tipsters</h1>
         <Dialog
           open={open}
@@ -180,7 +180,7 @@ export default function TipstersPage() {
                         size="icon-sm"
                         onClick={() => handleDelete(tipster)}
                       >
-                        <Trash2 className="size-4 text-rose-500" />
+                        <Trash2 className="size-4 text-loss" />
                       </Button>
                     </div>
                   </TableCell>

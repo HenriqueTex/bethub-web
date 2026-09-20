@@ -69,7 +69,7 @@ import {
 import { PunterCreateForm } from "@/components/punter-create-form"
 import { emptyCarryOver, type PunterCarryOver } from "@/lib/punter-draft"
 import { ResultBadge } from "@/components/result-badge"
-import { formatBRL, formatDate, formatOdd, formatSigned, formatUnits, RESULT_LABELS } from "@/lib/format"
+import { formatBRL, formatDate, formatOdd, formatSigned, formatPercent, formatUnits, RESULT_LABELS } from "@/lib/format"
 import { cn } from "@/lib/utils"
 import {
   resources,
@@ -536,7 +536,7 @@ function SurebetLegImageInput({
       <p
         className={cn(
           "h-4 max-w-20 truncate text-[11px] leading-4",
-          error ? "text-rose-600" : status ? "text-emerald-600" : "text-muted-foreground"
+          error ? "text-loss" : status ? "text-profit" : "text-muted-foreground"
         )}
         title={error ?? status ?? undefined}
       >
@@ -1035,7 +1035,7 @@ function SurebetCreateForm({
     "Surebet calculada:",
     `Investimento total: ${formatBRL(totalInvestment)}`,
     `Retorno garantido: ${formatBRL(calculation.guaranteedReturn)}`,
-    `Lucro garantido: ${formatSigned(calculation.guaranteedProfit)} (${calculation.roi}%)`,
+    `Lucro garantido: ${formatSigned(calculation.guaranteedProfit)} (${formatPercent(calculation.roi)})`,
     `Odd garantida: ${calculation.guaranteedOdd || 0}`,
     "Pernas:",
     ...calculation.legs.map((leg, index) => {
@@ -1060,7 +1060,7 @@ function SurebetCreateForm({
     <form onSubmit={onSubmit} className="rounded-lg border bg-card p-4 shadow-sm">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-xl font-semibold">Nova surebet</h1>
+          <h2 className="text-lg font-semibold">Nova surebet</h2>
           <p className="text-sm text-muted-foreground">
             Calcule as pernas e registre a operação no método Surebet.
           </p>
@@ -1069,6 +1069,293 @@ function SurebetCreateForm({
       </div>
 
       <div className="space-y-5">
+
+        <div className="rounded-md border bg-muted/20 p-4">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <Calculator className="size-4 text-profit" />
+              <h2 className="font-semibold">Calculadora de surebet</h2>
+            </div>
+            <Badge variant={calculation.inverseSum > 0 && calculation.inverseSum < 1 ? "default" : "outline"}>
+              {calculation.inverseSum > 0
+                ? `${roundMoney((1 - calculation.inverseSum) * 100)}% margem`
+                : "Informe as odds"}
+            </Badge>
+          </div>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Preencha valor e odd da perna âncora (ícone <Anchor className="inline size-3" />) — ao
+            digitar a odd das outras pernas, o valor delas é calculado automaticamente para
+            equalizar o retorno. Edite qualquer valor para travá-lo; limpe o campo para voltar ao
+            automático.
+          </p>
+
+          <div className="mt-4 grid gap-4 xl:grid-cols-[190px_minmax(0,1fr)]">
+            <div className="grid gap-2">
+              <Label htmlFor="surebet-investment">Investimento total</Label>
+              <DecimalInput
+                id="surebet-investment"
+                step="0.01"
+                min="0"
+                value={investment}
+                onChange={(event) => setInvestment(event.target.value)}
+              />
+            </div>
+            <div className="grid min-w-0 gap-3 min-[480px]:grid-cols-2 xl:grid-cols-4">
+              <div className="rounded-md border bg-card p-3">
+                <p className="text-xs text-muted-foreground">Retorno garantido</p>
+                <p className="mt-1 font-semibold">{formatBRL(calculation.guaranteedReturn)}</p>
+              </div>
+              <div className="rounded-md border bg-card p-3">
+                <p className="text-xs text-muted-foreground">Lucro</p>
+                <p
+                  className={cn(
+                    "mt-1 font-semibold",
+                    calculation.guaranteedProfit >= 0 ? "text-profit" : "text-loss"
+                  )}
+                >
+                  {formatSigned(calculation.guaranteedProfit)}
+                </p>
+              </div>
+              <div className="rounded-md border bg-card p-3">
+                <p className="text-xs text-muted-foreground">ROI</p>
+                <p className="mt-1 font-semibold">{formatPercent(calculation.roi)}</p>
+              </div>
+              <div className="rounded-md border bg-card p-3">
+                <p className="text-xs text-muted-foreground">Odd garantida</p>
+                <p className="mt-1 font-semibold">
+                  {formatOdd(calculation.guaranteedOdd || 0)}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-4 space-y-3">
+            {legs.map((leg, index) => {
+              const calculatedLeg = calculation.legs.find((item) => item.id === leg.id)
+              return (
+                <div key={leg.id} className="rounded-md border bg-card p-3">
+                  <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Badge variant="outline">Perna {index + 1}</Badge>
+                      {leg.freebet.mode === "is" && (
+                        <Badge className="border-transparent bg-amber-500/15 text-warning">
+                          Freebet
+                        </Badge>
+                      )}
+                      <span className="text-sm text-muted-foreground">
+                        Stake {formatBRL(calculatedLeg?.stake)}
+                      </span>
+                      {!!calculatedLeg?.returnAmount && (
+                        <span className="text-sm text-muted-foreground">
+                          · Retorno {formatBRL(calculatedLeg.returnAmount)}
+                        </span>
+                      )}
+                      {!!calculatedLeg?.freebetGenerated && (
+                        <span className="text-sm text-warning">
+                          · Gera freebet {formatBRL(calculatedLeg.freebetGenerated)}
+                        </span>
+                      )}
+                      {!!calculatedLeg && calculation.valid && (
+                        <span
+                          className={cn(
+                            "text-sm font-medium",
+                            calculatedLeg.scenarioNet >= 0 ? "text-profit" : "text-loss"
+                          )}
+                        >
+                          · Se vencer: {formatSigned(calculatedLeg.scenarioNet)}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <FreebetPopover
+                        size="icon-sm"
+                        namePrefix={`leg${leg.id}-`}
+                        value={leg.freebet}
+                        onChange={(freebet) => updateLeg(leg.id, { freebet })}
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon-sm"
+                        onClick={() => toggleAnchor(leg.id)}
+                        aria-pressed={anchorLegId === leg.id}
+                        title={
+                          anchorLegId === leg.id
+                            ? "Perna âncora — as demais são calculadas a partir dela (clique para desativar)"
+                            : "Definir como perna âncora"
+                        }
+                        className={cn(
+                          anchorLegId === leg.id &&
+                            "bg-emerald-500/10 text-profit hover:bg-emerald-500/20 hover:text-profit"
+                        )}
+                      >
+                        <Anchor className="size-4" />
+                      </Button>
+                      {legs.length > 2 && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon-sm"
+                          onClick={() => removeLeg(leg.id)}
+                          aria-label={`Remover perna ${index + 1}`}
+                        >
+                          <MinusCircle className="size-4 text-loss" />
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col gap-4 lg:flex-row">
+                    <SurebetLegImageInput
+                      legId={leg.id}
+                      legNumber={index + 1}
+                      state={legImages[leg.id]}
+                      onChange={handleLegImageChange}
+                      onClear={clearLegImage}
+                    />
+                    <div className="grid min-w-0 flex-1 content-start gap-3">
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        <div className="grid min-w-0 gap-2">
+                          <Label>Conta</Label>
+                          <Select
+                            value={leg.accountId}
+                            onValueChange={(value) =>
+                              updateLeg(leg.id, { accountId: String(value) })
+                            }
+                            required={index === 0}
+                          >
+                            <SelectTrigger className="!w-full min-w-0">
+                              <SelectValue placeholder="Selecione" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {activeAccounts.map((account) => (
+                                <SelectItem key={account.id} value={String(account.id)}>
+                                  {account.bookmaker?.name}
+                                  {account.label ? ` - ${account.label}` : ""}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="grid min-w-0 gap-2">
+                          <Label htmlFor={`surebet-leg-selection-${leg.id}`}>Seleção</Label>
+                          <Input
+                            id={`surebet-leg-selection-${leg.id}`}
+                            value={leg.selection}
+                            onChange={(event) =>
+                              updateLeg(leg.id, { selection: event.target.value })
+                            }
+                            placeholder="Time A ML, Over 2.5..."
+                          />
+                        </div>
+                      </div>
+                      <div className="surebet-fields">
+                        <div className="grid gap-2">
+                      <Label htmlFor={`surebet-leg-value-${leg.id}`}>Valor</Label>
+                      <DecimalInput
+                        id={`surebet-leg-value-${leg.id}`}
+                        step="0.01"
+                        min="0"
+                        value={
+                          leg.value !== ""
+                            ? leg.value
+                            : calculatedLeg?.stake
+                              ? String(calculatedLeg.stake)
+                              : ""
+                        }
+                        onChange={(event) => updateLeg(leg.id, { value: event.target.value })}
+                        placeholder="0.00"
+                        className={cn(
+                          leg.value === "" && calculatedLeg?.stake ? "text-muted-foreground" : ""
+                        )}
+                      />
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor={`surebet-leg-odd-${leg.id}`}>ODD</Label>
+                      <DecimalInput
+                        id={`surebet-leg-odd-${leg.id}`}
+                        step="0.001"
+                        min="1.01"
+                        value={leg.odd}
+                        onChange={(event) => updateLeg(leg.id, { odd: event.target.value })}
+                        placeholder="2.10"
+                      />
+                    </div>
+                    <div className="grid gap-2">
+                      <Label>Back/Lay</Label>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className={cn(
+                          "h-10 justify-center font-semibold",
+                          leg.type === "back"
+                            ? "border-primary/40 bg-primary/10 text-primary hover:bg-primary/20"
+                            : "border-rose-500/40 bg-rose-500/10 text-loss hover:bg-rose-500/20 dark:text-loss"
+                        )}
+                        onClick={() =>
+                          updateLeg(leg.id, { type: leg.type === "back" ? "lay" : "back" })
+                        }
+                        aria-pressed={leg.type === "lay"}
+                      >
+                        {leg.type === "back" ? "Back" : "Lay"}
+                      </Button>
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor={`surebet-leg-commission-${leg.id}`}>Comissão (%)</Label>
+                      <DecimalInput
+                        id={`surebet-leg-commission-${leg.id}`}
+                        step="0.01"
+                        min="0"
+                        max="100"
+                        value={leg.commission}
+                        onChange={(event) =>
+                          updateLeg(leg.id, { commission: event.target.value })
+                        }
+                        placeholder="0"
+                      />
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor={`surebet-leg-cashback-${leg.id}`}>Cashback (%)</Label>
+                      <DecimalInput
+                        id={`surebet-leg-cashback-${leg.id}`}
+                        step="0.01"
+                        min="0"
+                        max="100"
+                        value={leg.cashback}
+                        onChange={(event) =>
+                          updateLeg(leg.id, { cashback: event.target.value })
+                        }
+                        placeholder="0"
+                      />
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor={`surebet-leg-boost-${leg.id}`}>Boost (%)</Label>
+                      <DecimalInput
+                        id={`surebet-leg-boost-${leg.id}`}
+                        step="0.01"
+                        min="0"
+                        max="100"
+                        value={leg.boost}
+                        onChange={(event) => updateLeg(leg.id, { boost: event.target.value })}
+                        placeholder="0"
+                      />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )
+            })}
+
+            {legs.length < MAX_SUREBET_LEGS && (
+              <Button type="button" variant="outline" onClick={addLeg}>
+                <Plus className="size-4" />
+                Adicionar perna ({legs.length}/{MAX_SUREBET_LEGS})
+              </Button>
+            )}
+          </div>
+        </div>
+
         <div className="grid gap-4 md:grid-cols-2">
           <div className="grid gap-2 md:col-span-2">
             <Label htmlFor="surebet-event">Evento</Label>
@@ -1114,6 +1401,9 @@ function SurebetCreateForm({
               ))}
             </datalist>
           </div>
+          <details className="rounded-md border p-3 md:col-span-2">
+            <summary className="text-sm font-medium">Mais detalhes</summary>
+            <div className="mt-4 grid gap-4 md:grid-cols-2">
           <div className="grid gap-2">
             <Label htmlFor="surebet-sport">Esporte (opcional)</Label>
             <Input
@@ -1176,292 +1466,8 @@ function SurebetCreateForm({
               placeholder="Contexto, monitor, limite de casa, observações..."
             />
           </div>
-        </div>
-
-        <div className="rounded-md border bg-muted/20 p-4">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="flex items-center gap-2">
-              <Calculator className="size-4 text-emerald-600" />
-              <h2 className="font-semibold">Calculadora de surebet</h2>
             </div>
-            <Badge variant={calculation.inverseSum > 0 && calculation.inverseSum < 1 ? "default" : "outline"}>
-              {calculation.inverseSum > 0
-                ? `${roundMoney((1 - calculation.inverseSum) * 100)}% margem`
-                : "Informe as odds"}
-            </Badge>
-          </div>
-          <p className="mt-1 text-xs text-muted-foreground">
-            Preencha valor e odd da perna âncora (ícone <Anchor className="inline size-3" />) — ao
-            digitar a odd das outras pernas, o valor delas é calculado automaticamente para
-            equalizar o retorno. Edite qualquer valor para travá-lo; limpe o campo para voltar ao
-            automático.
-          </p>
-
-          <div className="mt-4 grid gap-4 md:grid-cols-[220px_1fr]">
-            <div className="grid gap-2">
-              <Label htmlFor="surebet-investment">Investimento total</Label>
-              <DecimalInput
-                id="surebet-investment"
-                step="0.01"
-                min="0"
-                value={investment}
-                onChange={(event) => setInvestment(event.target.value)}
-              />
-            </div>
-            <div className="grid gap-3 sm:grid-cols-4">
-              <div className="rounded-md border bg-card p-3">
-                <p className="text-xs text-muted-foreground">Retorno garantido</p>
-                <p className="mt-1 font-semibold">{formatBRL(calculation.guaranteedReturn)}</p>
-              </div>
-              <div className="rounded-md border bg-card p-3">
-                <p className="text-xs text-muted-foreground">Lucro</p>
-                <p
-                  className={cn(
-                    "mt-1 font-semibold",
-                    calculation.guaranteedProfit >= 0 ? "text-emerald-600" : "text-rose-600"
-                  )}
-                >
-                  {formatSigned(calculation.guaranteedProfit)}
-                </p>
-              </div>
-              <div className="rounded-md border bg-card p-3">
-                <p className="text-xs text-muted-foreground">ROI</p>
-                <p className="mt-1 font-semibold">{calculation.roi}%</p>
-              </div>
-              <div className="rounded-md border bg-card p-3">
-                <p className="text-xs text-muted-foreground">Odd garantida</p>
-                <p className="mt-1 font-semibold">
-                  {calculation.guaranteedOdd ? calculation.guaranteedOdd.toFixed(2) : "0.00"}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-4 space-y-3">
-            {legs.map((leg, index) => {
-              const calculatedLeg = calculation.legs.find((item) => item.id === leg.id)
-              return (
-                <div key={leg.id} className="rounded-md border bg-card p-3">
-                  <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <Badge variant="outline">Perna {index + 1}</Badge>
-                      {leg.freebet.mode === "is" && (
-                        <Badge className="border-transparent bg-amber-500/15 text-amber-500">
-                          Freebet
-                        </Badge>
-                      )}
-                      <span className="text-sm text-muted-foreground">
-                        Stake {formatBRL(calculatedLeg?.stake)}
-                      </span>
-                      {!!calculatedLeg?.returnAmount && (
-                        <span className="text-sm text-muted-foreground">
-                          · Retorno {formatBRL(calculatedLeg.returnAmount)}
-                        </span>
-                      )}
-                      {!!calculatedLeg?.freebetGenerated && (
-                        <span className="text-sm text-amber-500">
-                          · Gera freebet {formatBRL(calculatedLeg.freebetGenerated)}
-                        </span>
-                      )}
-                      {!!calculatedLeg && calculation.valid && (
-                        <span
-                          className={cn(
-                            "text-sm font-medium",
-                            calculatedLeg.scenarioNet >= 0 ? "text-emerald-600" : "text-rose-600"
-                          )}
-                        >
-                          · Se vencer: {formatSigned(calculatedLeg.scenarioNet)}
-                        </span>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <FreebetPopover
-                        size="icon-sm"
-                        namePrefix={`leg${leg.id}-`}
-                        value={leg.freebet}
-                        onChange={(freebet) => updateLeg(leg.id, { freebet })}
-                      />
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon-sm"
-                        onClick={() => toggleAnchor(leg.id)}
-                        aria-pressed={anchorLegId === leg.id}
-                        title={
-                          anchorLegId === leg.id
-                            ? "Perna âncora — as demais são calculadas a partir dela (clique para desativar)"
-                            : "Definir como perna âncora"
-                        }
-                        className={cn(
-                          anchorLegId === leg.id &&
-                            "bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 hover:text-emerald-600"
-                        )}
-                      >
-                        <Anchor className="size-4" />
-                      </Button>
-                      {legs.length > 2 && (
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon-sm"
-                          onClick={() => removeLeg(leg.id)}
-                          aria-label={`Remover perna ${index + 1}`}
-                        >
-                          <MinusCircle className="size-4 text-rose-500" />
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="flex flex-wrap gap-4 sm:flex-nowrap">
-                    <SurebetLegImageInput
-                      legId={leg.id}
-                      legNumber={index + 1}
-                      state={legImages[leg.id]}
-                      onChange={handleLegImageChange}
-                      onClear={clearLegImage}
-                    />
-                    <div className="grid min-w-0 flex-1 content-start gap-3">
-                      <div className="grid gap-3 sm:grid-cols-2">
-                        <div className="grid min-w-0 gap-2">
-                          <Label>Conta</Label>
-                          <Select
-                            value={leg.accountId}
-                            onValueChange={(value) =>
-                              updateLeg(leg.id, { accountId: String(value) })
-                            }
-                            required={index === 0}
-                          >
-                            <SelectTrigger className="!w-full min-w-0">
-                              <SelectValue placeholder="Selecione" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {activeAccounts.map((account) => (
-                                <SelectItem key={account.id} value={String(account.id)}>
-                                  {account.bookmaker?.name}
-                                  {account.label ? ` - ${account.label}` : ""}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <div className="grid min-w-0 gap-2">
-                          <Label htmlFor={`surebet-leg-selection-${leg.id}`}>Seleção</Label>
-                          <Input
-                            id={`surebet-leg-selection-${leg.id}`}
-                            value={leg.selection}
-                            onChange={(event) =>
-                              updateLeg(leg.id, { selection: event.target.value })
-                            }
-                            placeholder="Time A ML, Over 2.5..."
-                          />
-                        </div>
-                      </div>
-                      <div className="grid grid-cols-2 gap-3 md:grid-cols-6">
-                        <div className="grid gap-2">
-                      <Label htmlFor={`surebet-leg-value-${leg.id}`}>Valor</Label>
-                      <DecimalInput
-                        id={`surebet-leg-value-${leg.id}`}
-                        step="0.01"
-                        min="0"
-                        value={
-                          leg.value !== ""
-                            ? leg.value
-                            : calculatedLeg?.stake
-                              ? String(calculatedLeg.stake)
-                              : ""
-                        }
-                        onChange={(event) => updateLeg(leg.id, { value: event.target.value })}
-                        placeholder="0.00"
-                        className={cn(
-                          leg.value === "" && calculatedLeg?.stake ? "text-muted-foreground" : ""
-                        )}
-                      />
-                    </div>
-                    <div className="grid gap-2">
-                      <Label htmlFor={`surebet-leg-odd-${leg.id}`}>ODD</Label>
-                      <DecimalInput
-                        id={`surebet-leg-odd-${leg.id}`}
-                        step="0.001"
-                        min="1.01"
-                        value={leg.odd}
-                        onChange={(event) => updateLeg(leg.id, { odd: event.target.value })}
-                        placeholder="2.10"
-                      />
-                    </div>
-                    <div className="grid gap-2">
-                      <Label>Back/Lay</Label>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        className={cn(
-                          "h-10 justify-center font-semibold",
-                          leg.type === "back"
-                            ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-700 hover:bg-emerald-500/20 dark:text-emerald-400"
-                            : "border-rose-500/40 bg-rose-500/10 text-rose-700 hover:bg-rose-500/20 dark:text-rose-400"
-                        )}
-                        onClick={() =>
-                          updateLeg(leg.id, { type: leg.type === "back" ? "lay" : "back" })
-                        }
-                        aria-pressed={leg.type === "lay"}
-                      >
-                        {leg.type === "back" ? "Back" : "Lay"}
-                      </Button>
-                    </div>
-                    <div className="grid gap-2">
-                      <Label htmlFor={`surebet-leg-commission-${leg.id}`}>Comissão</Label>
-                      <DecimalInput
-                        id={`surebet-leg-commission-${leg.id}`}
-                        step="0.01"
-                        min="0"
-                        max="100"
-                        value={leg.commission}
-                        onChange={(event) =>
-                          updateLeg(leg.id, { commission: event.target.value })
-                        }
-                        placeholder="0"
-                      />
-                    </div>
-                    <div className="grid gap-2">
-                      <Label htmlFor={`surebet-leg-cashback-${leg.id}`}>Cashback</Label>
-                      <DecimalInput
-                        id={`surebet-leg-cashback-${leg.id}`}
-                        step="0.01"
-                        min="0"
-                        max="100"
-                        value={leg.cashback}
-                        onChange={(event) =>
-                          updateLeg(leg.id, { cashback: event.target.value })
-                        }
-                        placeholder="0"
-                      />
-                    </div>
-                    <div className="grid gap-2">
-                      <Label htmlFor={`surebet-leg-boost-${leg.id}`}>Aumento</Label>
-                      <DecimalInput
-                        id={`surebet-leg-boost-${leg.id}`}
-                        step="0.01"
-                        min="0"
-                        max="100"
-                        value={leg.boost}
-                        onChange={(event) => updateLeg(leg.id, { boost: event.target.value })}
-                        placeholder="0"
-                      />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )
-            })}
-
-            {legs.length < MAX_SUREBET_LEGS && (
-              <Button type="button" variant="outline" onClick={addLeg}>
-                <Plus className="size-4" />
-                Adicionar perna ({legs.length}/{MAX_SUREBET_LEGS})
-              </Button>
-            )}
-          </div>
+          </details>
         </div>
 
         <input type="hidden" name="bookmakerAccountId" value={primaryAccountId} />
@@ -1728,7 +1734,7 @@ export default function BetsView({
           onSubmit={handleSubmit}
         />
       ) : (
-        <div className="flex items-center justify-between">
+        <div className="page-heading">
           <h1 className="text-2xl font-bold">{title}</h1>
           <Button
             onClick={() => {
@@ -1744,7 +1750,7 @@ export default function BetsView({
 
       {inlineCreateForm && <h2 className="text-lg font-semibold">Apostas registradas</h2>}
 
-      <div className="flex flex-wrap items-end gap-2 rounded-lg border bg-card p-3">
+      <div className="bet-filters flex flex-wrap items-end gap-3 rounded-lg border bg-card p-4">
         <Input
           placeholder="Buscar evento, seleção..."
           className="w-52"
@@ -1817,9 +1823,10 @@ export default function BetsView({
             ))}
           </SelectContent>
         </Select>
-        <div className="flex items-center gap-1">
+        <div className="bet-filter-dates">
           <Input
             type="date"
+            aria-label="Data inicial"
             className="w-36"
             value={filters.from}
             onChange={(e) => updateFilter("from", e.target.value)}
@@ -1827,6 +1834,7 @@ export default function BetsView({
           <span className="text-muted-foreground">–</span>
           <Input
             type="date"
+            aria-label="Data final"
             className="w-36"
             value={filters.to}
             onChange={(e) => updateFilter("to", e.target.value)}
@@ -1901,8 +1909,8 @@ export default function BetsView({
                       bet.profitAmount === null
                         ? "text-muted-foreground"
                         : bet.profitAmount >= 0
-                          ? "text-emerald-600"
-                          : "text-rose-600"
+                          ? "text-profit"
+                          : "text-loss"
                     )}
                   >
                     {bet.profitAmount === null ? "—" : formatSigned(bet.profitAmount)}
@@ -1941,7 +1949,7 @@ export default function BetsView({
                         <Pencil className="size-4" />
                       </Button>
                       <Button variant="ghost" size="icon-sm" onClick={() => handleDelete(bet)}>
-                        <Trash2 className="size-4 text-rose-500" />
+                        <Trash2 className="size-4 text-loss" />
                       </Button>
                     </div>
                   </TableCell>

@@ -31,6 +31,7 @@ export function BetImportInput({
   onAnalyze,
   onCancel
 }: Props) {
+  const [dragging, setDragging] = useState(false)
   const [file, setFile] = useState<File | null>(null)
   const [preview, setPreview] = useState<string | null>(null)
   const [source, setSource] = useState<"image" | "text">("image")
@@ -137,10 +138,13 @@ export function BetImportInput({
           <button
             type="button"
             disabled={disabled}
-            className="relative flex h-32 w-full items-center justify-center overflow-hidden rounded-md border border-dashed bg-background p-3 focus-visible:ring-2 focus-visible:ring-ring lg:h-52"
+            data-dragging={dragging}
+            className="data-[dragging=true]:border-primary data-[dragging=true]:bg-primary/10 relative flex h-32 w-full items-center justify-center overflow-hidden rounded-md border border-dashed bg-background p-3 focus-visible:ring-2 focus-visible:ring-ring lg:h-52"
             onClick={() => input.current?.click()}
-            onDragOver={(event) => event.preventDefault()}
+            onDragOver={(event) => { event.preventDefault(); if (!disabled) setDragging(true) }}
+            onDragLeave={() => setDragging(false)}
             onDrop={(event) => {
+              setDragging(false)
               event.preventDefault()
               if (!disabled && event.dataTransfer.files[0])
                 selectFile(event.dataTransfer.files[0])
@@ -160,7 +164,7 @@ export function BetImportInput({
                 <ImagePlus className="size-6 text-muted-foreground" />
                 Importar aposta por imagem
                 <span className="text-xs text-muted-foreground">
-                  Arraste, clique ou cole com Ctrl+V
+                  <span className="sm:hidden">Toque para escolher o comprovante</span><span className="hidden sm:inline">Arraste, clique ou cole com Ctrl+V</span>
                 </span>
               </span>
             )}

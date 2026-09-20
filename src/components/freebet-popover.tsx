@@ -112,7 +112,7 @@ export function FreebetPopover({
             aria-pressed={active}
             className={cn(
               active &&
-                "bg-amber-500/15 text-amber-500 hover:bg-amber-500/25 hover:text-amber-500"
+                "bg-amber-500/15 text-warning hover:bg-amber-500/25 hover:text-warning"
             )}
           >
             <Gift className="size-4" />
@@ -121,7 +121,7 @@ export function FreebetPopover({
         <PopoverContent align="end" className="w-80 gap-3">
           <PopoverHeader className="items-center text-center">
             <PopoverTitle className="flex items-center justify-center gap-2">
-              <Gift className="size-4 text-amber-500" /> Freebet
+              <Gift className="size-4 text-warning" /> Freebet
             </PopoverTitle>
           </PopoverHeader>
 
@@ -132,7 +132,7 @@ export function FreebetPopover({
               className="flex items-center gap-2.5 rounded-md px-2 py-2 text-left transition-colors hover:bg-accent"
             >
               {state.mode === "is" ? (
-                <Check className="size-4 shrink-0 text-amber-500" />
+                <Check className="size-4 shrink-0 text-warning" />
               ) : (
                 <Circle className="size-4 shrink-0 text-muted-foreground" />
               )}
@@ -144,7 +144,7 @@ export function FreebetPopover({
               className="flex items-center gap-2.5 rounded-md px-2 py-2 text-left transition-colors hover:bg-accent"
             >
               {state.mode === "generates" ? (
-                <Check className="size-4 shrink-0 text-amber-500" />
+                <Check className="size-4 shrink-0 text-warning" />
               ) : (
                 <Circle className="size-4 shrink-0 text-muted-foreground" />
               )}
@@ -211,7 +211,7 @@ export function FreebetPopover({
               {freebetExtractedValue(state) > 0 && (
                 <p className="rounded-md bg-muted/50 px-3 py-2 text-xs text-muted-foreground">
                   Valor extraível estimado:{" "}
-                  <span className="font-medium text-amber-500">
+                  <span className="font-medium text-warning">
                     {new Intl.NumberFormat("pt-BR", {
                       style: "currency",
                       currency: "BRL",

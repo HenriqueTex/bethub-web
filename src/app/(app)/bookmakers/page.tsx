@@ -200,7 +200,7 @@ export default function BookmakersPage() {
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="page-heading">
         <h1 className="text-2xl font-bold">Casas & Contas</h1>
         <Button onClick={() => setBookmakerDialog(true)}>
           <Plus className="size-4" /> Nova casa
@@ -254,18 +254,18 @@ export default function BookmakersPage() {
       ) : (
         filtered.map((bookmaker) => (
           <Card key={bookmaker.id} className={cn(!bookmaker.active && "opacity-60")}>
-            <CardHeader className="flex-row items-center justify-between">
-              <div className="flex items-center gap-3">
+            <CardHeader className="flex-row flex-wrap items-center justify-between gap-3">
+              <div className="flex flex-wrap items-center gap-3">
                 <BookmakerLogo name={bookmaker.name} />
                 <CardTitle className="text-lg">{bookmaker.name}</CardTitle>
                 {!bookmaker.active && <Badge variant="secondary">Inativa</Badge>}
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex flex-wrap items-center gap-3">
                 <span className="text-sm text-muted-foreground">Saldo total</span>
                 <span
                   className={cn(
                     "text-lg font-semibold",
-                    (bookmaker.totalBalance ?? 0) >= 0 ? "text-emerald-600" : "text-rose-600"
+                    (bookmaker.totalBalance ?? 0) >= 0 ? "text-profit" : "text-loss"
                   )}
                 >
                   {formatBRL(bookmaker.totalBalance)}
@@ -278,7 +278,7 @@ export default function BookmakersPage() {
                   size="icon-sm"
                   onClick={() => handleDeleteBookmaker(bookmaker)}
                 >
-                  <Trash2 className="size-4 text-rose-500" />
+                  <Trash2 className="size-4 text-loss" />
                 </Button>
               </div>
             </CardHeader>
@@ -319,13 +319,13 @@ export default function BookmakersPage() {
                           className={cn(
                             "text-right",
                             (account.balance?.profit ?? 0) >= 0
-                              ? "text-emerald-600"
-                              : "text-rose-600"
+                              ? "text-profit"
+                              : "text-loss"
                           )}
                         >
                           {formatSigned(account.balance?.profit)}
                         </TableCell>
-                        <TableCell className="text-right text-amber-500">
+                        <TableCell className="text-right text-warning">
                           {account.balance?.pendingFreebets
                             ? `${formatBRL(account.balance.pendingFreebets)} a extrair`
                             : account.balance?.extractedFreebets
@@ -349,7 +349,7 @@ export default function BookmakersPage() {
                               size="icon-sm"
                               onClick={() => handleDeleteAccount(account)}
                             >
-                              <Trash2 className="size-4 text-rose-500" />
+                              <Trash2 className="size-4 text-loss" />
                             </Button>
                           </div>
                         </TableCell>
@@ -421,7 +421,7 @@ export default function BookmakersPage() {
               Movimentações — {txAccount?.label || `Conta #${txAccount?.id}`}
             </DialogTitle>
           </DialogHeader>
-          <form onSubmit={handleCreateTransaction} className="grid grid-cols-[1fr_1fr_auto] gap-2">
+          <form onSubmit={handleCreateTransaction} className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_auto] gap-2">
             <Select name="type" defaultValue="deposit" required>
               <SelectTrigger>
                 <SelectValue />
@@ -457,8 +457,8 @@ export default function BookmakersPage() {
                           variant="outline"
                           className={cn(
                             transaction.type === "deposit"
-                              ? "text-emerald-600"
-                              : "text-rose-600"
+                              ? "text-profit"
+                              : "text-loss"
                           )}
                         >
                           {transaction.type === "deposit" ? "Depósito" : "Saque"}
@@ -478,7 +478,7 @@ export default function BookmakersPage() {
                             await reload()
                           }}
                         >
-                          <Trash2 className="size-3.5 text-rose-500" />
+                          <Trash2 className="size-3.5 text-loss" />
                         </Button>
                       </TableCell>
                     </TableRow>

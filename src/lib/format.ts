@@ -15,7 +15,7 @@ export function formatDate(value: string | null | undefined) {
 }
 
 export function formatOdd(value: number) {
-  return value.toFixed(2).replace(".", ",")
+  return new Intl.NumberFormat("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 3 }).format(value)
 }
 
 export function formatUnits(value: number) {
@@ -30,4 +30,12 @@ export const RESULT_LABELS: Record<string, string> = {
   half_red: "Half Red",
   void: "Void",
   cashout: "Cashout",
+}
+
+export function formatPercent(value: number | null | undefined) {
+  return value == null ? "—" : `${value.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`
+}
+
+export function formatSignedUnits(value: number | null | undefined) {
+  return value == null ? "—" : `${value > 0 ? "+" : ""}${value.toFixed(2)}u`
 }

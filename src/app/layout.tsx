@@ -1,14 +1,15 @@
 import type { Metadata } from "next";
 import { Roboto, Roboto_Mono } from "next/font/google";
 import "./globals.css";
+import { ThemeProvider } from "@/components/ui/contexts/theme-provider";
 
 const roboto = Roboto({
-  variable: "--font-sans",
+  variable: "--font-roboto",
   subsets: ["latin"],
 });
 
 const robotoMono = Roboto_Mono({
-  variable: "--font-geist-mono",
+  variable: "--font-roboto-mono",
   subsets: ["latin"],
 });
 
@@ -25,10 +26,10 @@ export default function RootLayout({
   return (
     <html
       lang="pt-BR"
-      className={`dark ${roboto.variable} ${robotoMono.variable} h-full antialiased`}
-      style={{ colorScheme: "dark" }}
+      className={`${roboto.variable} ${robotoMono.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col"><ThemeProvider>{children}</ThemeProvider></body>
     </html>
   );
 }

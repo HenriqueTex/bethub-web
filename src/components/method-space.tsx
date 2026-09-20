@@ -10,7 +10,7 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import BetsView from "@/components/bets-view"
-import { formatBRL, formatSigned } from "@/lib/format"
+import { formatBRL, formatSigned, formatPercent, formatSignedUnits } from "@/lib/format"
 import { cn } from "@/lib/utils"
 import { resources, Method, StatsSummary } from "@/lib/resources"
 
@@ -90,14 +90,15 @@ export default function MethodSpace({
 
   return (
     <div className="space-y-6">
-      <div className="mx-auto grid max-w-6xl grid-cols-2 gap-2 sm:gap-4 xl:grid-cols-4 [&>div]:min-w-0 [&_[data-slot=card-header]]:px-3 [&_[data-slot=card-content]]:px-3 sm:[&_[data-slot=card-header]]:px-6 sm:[&_[data-slot=card-content]]:px-6">
+      <div className="mx-auto max-w-6xl"><p className="mb-1 text-xs font-medium uppercase tracking-widest text-primary">Registro de apostas</p><h1 className="text-2xl font-bold">{methodName}</h1><p className="mt-1 text-sm text-muted-foreground">{methodName === "Surebet" ? "Calcule os cenários e registre cada perna da operação." : "Seu registro rápido, com todos os números sob controle."}</p></div>
+      <div className="mx-auto grid max-w-6xl grid-cols-1 min-[400px]:grid-cols-2 gap-2 sm:gap-4 xl:grid-cols-4 [&>div]:min-w-0 [&_[data-slot=card-header]]:px-3 [&_[data-slot=card-content]]:px-3 sm:[&_[data-slot=card-header]]:px-6 sm:[&_[data-slot=card-content]]:px-6">
         <Card className="py-4">
           <CardHeader className="pb-0">
             <CardDescription>{summaryCurrentMonth ? "Lucro no mês" : tagline}</CardDescription>
             <CardTitle
               className={cn(
                 "text-2xl",
-                profitPositive ? "text-emerald-600" : "text-rose-600"
+                profitPositive ? "text-profit" : "text-loss"
               )}
             >
               {formatSigned(summary?.profit)}
@@ -105,13 +106,13 @@ export default function MethodSpace({
           </CardHeader>
           <CardContent className="text-xs text-muted-foreground">
             {summaryCurrentMonth ? currentMonth.label : "lucro total"} ·{" "}
-            {summary ? `${summary.profitUnits > 0 ? "+" : ""}${summary.profitUnits}u` : "—"}
+            {summary ? formatSignedUnits(summary.profitUnits) : "—"}
           </CardContent>
         </Card>
         <Card className="py-4">
           <CardHeader className="pb-0">
             <CardDescription>ROI</CardDescription>
-            <CardTitle className="text-2xl">{summary ? `${summary.roi}%` : "—"}</CardTitle>
+            <CardTitle className="text-2xl">{summary ? formatPercent(summary.roi) : "—"}</CardTitle>
           </CardHeader>
           <CardContent className="text-xs text-muted-foreground">
             sobre {formatBRL(summary?.staked)} apostados
@@ -121,7 +122,7 @@ export default function MethodSpace({
         <Card className="py-4">
           <CardHeader className="pb-0">
             <CardDescription>Taxa de acerto</CardDescription>
-            <CardTitle className="text-2xl">{summary ? `${summary.hitRate}%` : "—"}</CardTitle>
+            <CardTitle className="text-2xl">{summary ? formatPercent(summary.hitRate) : "—"}</CardTitle>
           </CardHeader>
           <CardContent className="text-xs text-muted-foreground">
             {summary?.wins ?? 0} greens · {summary?.losses ?? 0} reds

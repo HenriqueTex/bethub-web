@@ -38,7 +38,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { formatBRL, formatSigned } from "@/lib/format"
+import { formatBRL, formatSigned, formatOdd, formatPercent, formatSignedUnits } from "@/lib/format"
 import { cn } from "@/lib/utils"
 import { resources, StatsRow, StatsSummary, TimelinePoint } from "@/lib/resources"
 
@@ -70,7 +70,7 @@ function periodFrom(period: string): string | undefined {
 }
 
 const chartConfig = {
-  cumulativeProfit: { label: "Lucro acumulado", color: "#059669" },
+  cumulativeProfit: { label: "Lucro acumulado", color: "var(--profit)" },
 }
 
 export default function DashboardPage() {
@@ -89,6 +89,15 @@ export default function DashboardPage() {
    * O gradiente corre de cima (maior valor) para baixo (menor), então o zero fica
    * nesta fração da altura — é onde o verde vira vermelho.
    */
+  const strokeZeroOffset = useMemo(() => {
+    const values = timeline.map((point) => point.cumulativeProfit)
+    const max = Math.max(...values)
+    const min = Math.min(...values)
+    if (max <= 0) return 0
+    if (min >= 0) return 1
+    return max / (max - min)
+  }, [timeline])
+
   const zeroOffset = useMemo(() => {
     const valores = timeline.map((point) => point.cumulativeProfit)
     const max = Math.max(0, ...valores)
@@ -119,10 +128,10 @@ export default function DashboardPage() {
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Dashboard</h1>
+      <div className="page-heading">
+        <div><p className="mb-1 text-xs font-medium uppercase tracking-widest text-primary">Visão geral</p><h1 className="text-2xl font-bold">Dashboard</h1><p className="mt-1 text-sm text-muted-foreground">Seu desempenho, além de cada aposta.</p></div>
         <Select value={period} onValueChange={(value) => setPeriod(String(value))}>
-          <SelectTrigger className="w-44">
+          <SelectTrigger aria-label="Período do dashboard" className="w-full sm:w-44">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -140,7 +149,7 @@ export default function DashboardPage() {
           <CardHeader className="pb-1">
             <CardDescription>Lucro no período</CardDescription>
             <CardTitle
-              className={cn("text-2xl", profitPositive ? "text-emerald-600" : "text-rose-600")}
+              className={cn("text-2xl", profitPositive ? "text-profit" : "text-loss")}
             >
               {formatSigned(summary?.netProfit ?? summary?.profit)}
             </CardTitle>
@@ -149,12 +158,12 @@ export default function DashboardPage() {
             {temCusto ? (
               <>
                 {formatSigned(summary?.profit)} em apostas · custos{" "}
-                <span className="text-rose-600">-{formatBRL(summary?.costs)}</span>
+                <span className="text-loss">-{formatBRL(summary?.costs)}</span>
               </>
             ) : (
               <>
-                {summary ? `${summary.profitUnits > 0 ? "+" : ""}${summary.profitUnits}u` : "—"} ·
-                odd média {summary?.avgOdd ?? "—"}
+                {summary ? formatSignedUnits(summary.profitUnits) : "—"} ·
+                odd média {summary ? formatOdd(summary.avgOdd) : "—"}
               </>
             )}
           </CardContent>
@@ -163,9 +172,9 @@ export default function DashboardPage() {
           <CardHeader className="pb-1">
             <CardDescription>ROI / Taxa de acerto</CardDescription>
             <CardTitle className="text-2xl">
-              {summary ? `${summary.netRoi ?? summary.roi}%` : "—"}
+              {summary ? formatPercent(summary.netRoi ?? summary.roi) : "—"}
               <span className="mx-2 text-muted-foreground">·</span>
-              {summary ? `${summary.hitRate}%` : "—"}
+              {summary ? formatPercent(summary.hitRate) : "—"}
             </CardTitle>
           </CardHeader>
           <CardContent className="text-xs text-muted-foreground">
@@ -213,20 +222,21 @@ export default function DashboardPage() {
               <AreaChart data={timeline} margin={{ left: 8, right: 8, top: 8 }}>
                 <defs>
                   <linearGradient id="fillProfit" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset={0} stopColor="#059669" stopOpacity={0.25} />
-                    <stop offset={zeroOffset} stopColor="#059669" stopOpacity={0.04} />
-                    <stop offset={zeroOffset} stopColor="#e11d48" stopOpacity={0.04} />
-                    <stop offset={1} stopColor="#e11d48" stopOpacity={0.25} />
+                    <stop offset={0} stopColor="var(--profit)" stopOpacity={0.25} />
+                    <stop offset={zeroOffset} stopColor="var(--profit)" stopOpacity={0.04} />
+                    <stop offset={zeroOffset} stopColor="var(--loss)" stopOpacity={0.04} />
+                    <stop offset={1} stopColor="var(--loss)" stopOpacity={0.25} />
                   </linearGradient>
                   <linearGradient id="strokeProfit" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset={zeroOffset} stopColor="#059669" />
-                    <stop offset={zeroOffset} stopColor="#e11d48" />
+                    <stop offset={strokeZeroOffset} stopColor="var(--profit)" />
+                    <stop offset={strokeZeroOffset} stopColor="var(--loss)" />
                   </linearGradient>
                 </defs>
-                <ReferenceLine y={0} stroke="currentColor" strokeOpacity={0.35} />
+                <ReferenceLine y={0} stroke="currentColor" strokeOpacity={0.35} strokeDasharray="4 4" />
                 <CartesianGrid vertical={false} strokeOpacity={0.35} />
                 <XAxis
                   dataKey="day"
+                  tick={{ fill: "var(--muted-foreground)" }}
                   tickLine={false}
                   axisLine={false}
                   tickMargin={8}
@@ -238,6 +248,7 @@ export default function DashboardPage() {
                   }
                 />
                 <YAxis
+                  tick={{ fill: "var(--muted-foreground)" }}
                   tickLine={false}
                   axisLine={false}
                   width={70}
@@ -260,6 +271,7 @@ export default function DashboardPage() {
                   stroke="url(#strokeProfit)"
                   strokeWidth={2}
                   fill="url(#fillProfit)"
+                  isAnimationActive={false}
                   dot={false}
                   activeDot={{ r: 4 }}
                 />
@@ -276,7 +288,7 @@ export default function DashboardPage() {
         </CardHeader>
         <CardContent>
           <Tabs value={dimension} onValueChange={(value) => setDimension(String(value))}>
-            <TabsList>
+            <TabsList aria-label="Dimensão do desempenho">
               {DIMENSIONS.map((option) => (
                 <TabsTrigger key={option.value} value={option.value}>
                   {option.label}
@@ -324,22 +336,22 @@ export default function DashboardPage() {
                           <TableCell
                             className={cn(
                               "text-right font-medium",
-                              row.profit >= 0 ? "text-emerald-600" : "text-rose-600"
+                              row.profit >= 0 ? "text-profit" : "text-loss"
                             )}
                           >
                             {formatSigned(row.profit)}
                           </TableCell>
                           {option.value === "tipster" && (
                             <>
-                              <TableCell className="text-right text-rose-600">
+                              <TableCell className="text-right text-loss">
                                 {row.cost ? `-${formatBRL(row.cost)}` : "—"}
                               </TableCell>
                               <TableCell
                                 className={cn(
                                   "text-right font-medium",
                                   (row.netProfit ?? row.profit) >= 0
-                                    ? "text-emerald-600"
-                                    : "text-rose-600"
+                                    ? "text-profit"
+                                    : "text-loss"
                                 )}
                               >
                                 {formatSigned(row.netProfit ?? row.profit)}
@@ -347,13 +359,12 @@ export default function DashboardPage() {
                             </>
                           )}
                           <TableCell className="text-right">
-                            {row.profitUnits > 0 ? "+" : ""}
-                            {row.profitUnits}u
+                            {formatSignedUnits(row.profitUnits)}
                           </TableCell>
                           <TableCell className="text-right">
-                            {option.value === "tipster" ? (row.netRoi ?? row.roi) : row.roi}%
+                            {formatPercent(option.value === "tipster" ? (row.netRoi ?? row.roi) : row.roi)}
                           </TableCell>
-                          <TableCell className="text-right">{row.hitRate}%</TableCell>
+                          <TableCell className="text-right">{formatPercent(row.hitRate)}</TableCell>
                         </TableRow>
                       ))
                     )}

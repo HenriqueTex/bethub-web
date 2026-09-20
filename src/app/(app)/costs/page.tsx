@@ -150,7 +150,7 @@ export default function CostsPage() {
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="page-heading">
         <h1 className="text-2xl font-bold">Custos</h1>
         <Button onClick={() => openDialog("new")}>
           <Plus className="size-4" /> Novo custo
@@ -161,7 +161,7 @@ export default function CostsPage() {
         <CardContent className="flex flex-wrap items-baseline gap-x-8 gap-y-2 py-4">
           <div>
             <p className="text-xs text-muted-foreground">Custo no mês</p>
-            <p className="text-2xl font-bold text-rose-600">
+            <p className="text-2xl font-bold text-loss">
               {formatBRL(summary?.total ?? 0)}
             </p>
           </div>
@@ -180,7 +180,7 @@ export default function CostsPage() {
               {rateados.map(({ tipster, value }) => (
                 <Badge key={tipster.id} variant="outline" className="gap-2">
                   {tipster.name}
-                  <span className="font-semibold text-rose-600">
+                  <span className="font-semibold text-loss">
                     {formatBRL(value)}
                   </span>
                 </Badge>
@@ -256,7 +256,7 @@ export default function CostsPage() {
                           size="icon-sm"
                           onClick={() => remove(cost)}
                         >
-                          <Trash2 className="size-4 text-rose-500" />
+                          <Trash2 className="size-4 text-loss" />
                         </Button>
                       </div>
                     </TableCell>

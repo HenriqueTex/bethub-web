@@ -3,6 +3,7 @@
 import { FormEvent, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import { ThemeSwitcher } from "@/components/theme-switcher"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -55,8 +56,9 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-muted/40 p-4">
-      <Card className="w-full max-w-sm">
+    <main className="flex min-h-dvh items-center justify-center bg-background p-4 py-20">
+      <div className="absolute right-4 top-4"><ThemeSwitcher compact /></div>
+      <Card className="w-full max-w-sm border-t-2 border-t-primary">
         <CardHeader>
           <CardTitle>Entrar no BetHub</CardTitle>
           <CardDescription>Acesse sua conta com e-mail e senha</CardDescription>

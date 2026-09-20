@@ -232,8 +232,8 @@ export function PunterCreateForm({
         <Label htmlFor={"create-bet-" + key}>
           {label}
           {draft.imported[key] && (
-            <span className="text-[11px] font-normal text-emerald-600 dark:text-emerald-400">
-              Importado
+            <span className="ai-badge">
+              IA · conferir
             </span>
           )}
         </Label>
@@ -246,7 +246,7 @@ export function PunterCreateForm({
               name={key}
               className={cn(
                 "h-11 min-w-0",
-                draft.imported[key] && "border-emerald-600/60"
+                draft.imported[key] && "ai-field"
               )}
               value={fields[key]}
               onChange={(event) => edit(key, event.target.value)}
@@ -283,7 +283,7 @@ export function PunterCreateForm({
       className="min-w-0 rounded-lg border bg-card p-4 shadow-sm sm:p-5"
     >
       <div className="mb-4">
-        <h1 className="text-xl font-semibold">Nova aposta</h1>
+        <h2 className="text-lg font-semibold">Nova aposta</h2>
         <p className="mt-1 text-sm text-muted-foreground">
           Importe um comprovante ou preencha os dados abaixo.
         </p>
@@ -304,7 +304,7 @@ export function PunterCreateForm({
             </p>
           )}
           {ready && activeAccounts.length === 0 && (
-            <p className="text-sm text-amber-600">
+            <p className="text-sm text-warning">
               Cadastre uma conta em{" "}
               <a href="/bookmakers" className="underline">
                 Casas & Contas
@@ -315,7 +315,7 @@ export function PunterCreateForm({
           {(status || importedCount > 0) && (
             <div
               role="status"
-              className="space-y-2 rounded-md bg-emerald-500/10 p-3 text-sm"
+              className="ai-notice space-y-2 rounded-md p-3 text-sm"
             >
               <p>
                 {status ||
@@ -367,8 +367,8 @@ export function PunterCreateForm({
               <Label htmlFor="create-bet-account">
                 Conta{" "}
                 {draft.imported.bookmakerAccountId && (
-                  <span className="text-xs text-emerald-600">
-                    Sugerida pela imagem
+                  <span className="ai-badge">
+                    IA · conferir
                   </span>
                 )}
               </Label>
@@ -380,7 +380,7 @@ export function PunterCreateForm({
                 onChange={(event) =>
                   edit("bookmakerAccountId", event.target.value)
                 }
-                className={selectClass}
+                className={cn(selectClass, draft.imported.bookmakerAccountId && "ai-field")}
               >
                 <option value="">Selecione a conta</option>
                 {activeAccounts.map((account) => (
@@ -442,8 +442,8 @@ export function PunterCreateForm({
                     ? "Valor apostado (R$)"
                     : "Unidades"}
                   {draft.imported.amount && (
-                    <span className="text-[11px] text-emerald-600">
-                      Importado
+                    <span className="ai-badge">
+                      IA · conferir
                     </span>
                   )}
                 </Label>
@@ -478,7 +478,7 @@ export function PunterCreateForm({
                 required
                 className={cn(
                   "h-11",
-                  draft.imported.amount && "border-emerald-600/60"
+                  draft.imported.amount && "ai-field"
                 )}
                 value={fields.amount}
                 onChange={(event) => edit("amount", event.target.value)}
@@ -503,7 +503,7 @@ export function PunterCreateForm({
             </span>
             <span>
               Lucro potencial:{" "}
-              <strong className="text-emerald-600 dark:text-emerald-400">
+              <strong className="text-profit dark:text-profit">
                 {odd >= 1.01 && stake > 0 ? formatBRL(profit) : "—"}
               </strong>
             </span>

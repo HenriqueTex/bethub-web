@@ -26,6 +26,7 @@ import {
   SheetTitle,
   SheetTrigger
 } from "@/components/ui/sheet"
+import { ThemeSwitcher } from "@/components/theme-switcher"
 import { Toaster } from "@/components/ui/sonner"
 import { cn } from "@/lib/utils"
 import { User, getToken, logout, me } from "@/lib/api"
@@ -109,7 +110,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                   "flex min-h-11 items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-accent",
                   compact && "justify-center px-0",
                   pathname.startsWith(href) &&
-                    "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+                    "bg-sidebar-accent text-sidebar-accent-foreground ring-1 ring-primary/20",
                   group === 0 && "font-semibold"
                 )}
               >
@@ -124,7 +125,8 @@ export default function AppLayout({ children }: { children: ReactNode }) {
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-dvh">
+      <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:rounded-md focus:bg-primary focus:p-3 focus:text-primary-foreground">Pular para o conteúdo</a>
       <aside
         id="desktop-sidebar"
         aria-label="Menu lateral"
@@ -141,7 +143,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
         >
           {!collapsed && (
             <Link href="/dashboard" className="text-lg font-bold">
-              Bet<span className="text-emerald-500">Hub</span>
+              Bet<span className="text-profit">Hub</span>
             </Link>
           )}
           <Button
@@ -165,6 +167,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
         </div>
         {navigation(collapsed)}
         <div className="border-t p-3">
+          <ThemeSwitcher compact={collapsed} />
           {!collapsed && (
             <p className="truncate px-3 pb-2 text-xs text-muted-foreground">
               {user.email}
@@ -214,12 +217,15 @@ export default function AppLayout({ children }: { children: ReactNode }) {
           </SheetContent>
         </Sheet>
         <Link href="/punter" className="font-bold">
-          Bet<span className="text-emerald-500">Hub</span>
+          Bet<span className="text-profit">Hub</span>
         </Link>
+        <div className="ml-auto"><ThemeSwitcher compact /></div>
       </div>
       <main
+        id="main-content"
+        tabIndex={-1}
         className={cn(
-          "min-w-0 bg-muted/30 p-3 sm:p-6 lg:p-8",
+          "min-h-dvh min-w-0 bg-background p-4 sm:p-6 lg:p-8",
           collapsed ? "md:ml-16" : "md:ml-60"
         )}
       >
