@@ -2,7 +2,14 @@
 
 import { useEffect, useMemo, useState } from "react"
 import { toast } from "sonner"
-import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts"
+import {
+  Area,
+  AreaChart,
+  CartesianGrid,
+  ReferenceLine,
+  XAxis,
+  YAxis
+} from "recharts"
 import {
   Card,
   CardContent,
@@ -77,6 +84,19 @@ export default function DashboardPage() {
     const from = periodFrom(period)
     return from ? { from } : {}
   }, [period])
+
+  /**
+   * O gradiente corre de cima (maior valor) para baixo (menor), então o zero fica
+   * nesta fração da altura — é onde o verde vira vermelho.
+   */
+  const zeroOffset = useMemo(() => {
+    const valores = timeline.map((point) => point.cumulativeProfit)
+    const max = Math.max(0, ...valores)
+    const min = Math.min(0, ...valores)
+    if (max <= 0) return 0
+    if (min >= 0) return 1
+    return max / (max - min)
+  }, [timeline])
 
   useEffect(() => {
     Promise.all([resources.stats.summary(filters), resources.stats.timeline(filters)])
@@ -182,10 +202,17 @@ export default function DashboardPage() {
               <AreaChart data={timeline} margin={{ left: 8, right: 8, top: 8 }}>
                 <defs>
                   <linearGradient id="fillProfit" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#059669" stopOpacity={0.25} />
-                    <stop offset="100%" stopColor="#059669" stopOpacity={0.02} />
+                    <stop offset={0} stopColor="#059669" stopOpacity={0.25} />
+                    <stop offset={zeroOffset} stopColor="#059669" stopOpacity={0.04} />
+                    <stop offset={zeroOffset} stopColor="#e11d48" stopOpacity={0.04} />
+                    <stop offset={1} stopColor="#e11d48" stopOpacity={0.25} />
+                  </linearGradient>
+                  <linearGradient id="strokeProfit" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset={zeroOffset} stopColor="#059669" />
+                    <stop offset={zeroOffset} stopColor="#e11d48" />
                   </linearGradient>
                 </defs>
+                <ReferenceLine y={0} stroke="currentColor" strokeOpacity={0.35} />
                 <CartesianGrid vertical={false} strokeOpacity={0.35} />
                 <XAxis
                   dataKey="day"
@@ -218,7 +245,8 @@ export default function DashboardPage() {
                 <Area
                   dataKey="cumulativeProfit"
                   type="monotone"
-                  stroke="#059669"
+                  baseValue={0}
+                  stroke="url(#strokeProfit)"
                   strokeWidth={2}
                   fill="url(#fillProfit)"
                   dot={false}
