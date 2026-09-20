@@ -142,7 +142,7 @@ export function PunterCreateForm({
     setWarnings([])
   }
 
-  async function analyze(file: File | null, text?: string, capturedAt?: Date | null) {
+  async function analyze(file: File | null, text?: string) {
     cancelAnalysis()
     setReceipt(file)
     const id = request.current.id
@@ -163,16 +163,11 @@ export function PunterCreateForm({
         return
       }
       const { values, matches } = analysisFields(result, accounts)
-      // a data impressa no comprovante manda; a do arquivo é só rede de proteção
-      const fromFile = !result.placedAt && capturedAt ? localDate(capturedAt.toISOString()) : ""
-      if (fromFile) values.placedAt = fromFile
       dispatch({ type: "import", values })
       const notices = [...(result.warnings ?? [])]
       if (!result.placedAt)
         notices.push(
-          fromFile
-            ? "Data não encontrada no comprovante: usamos a data do arquivo de imagem. Confira antes de salvar."
-            : "Data não encontrada: confira a data da aposta antes de salvar."
+          "Data não encontrada: confira a data da aposta antes de salvar."
         )
       if (result.bookmaker && matches.length > 1)
         notices.push(

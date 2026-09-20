@@ -21,7 +21,7 @@ import {
 interface Props {
   loading: boolean
   disabled?: boolean
-  onAnalyze: (file: File | null, text?: string, capturedAt?: Date | null) => void
+  onAnalyze: (file: File | null, text?: string) => void
   onCancel: () => void
 }
 
@@ -94,10 +94,9 @@ export function BetImportInput({
     setError("")
     const current = ++generation.current
     setPreparing(true)
-    const capturedAt = target.lastModified ? new Date(target.lastModified) : null
     try {
       const prepared = await prepareBetImage(target, area)
-      if (current === generation.current) onAnalyze(prepared, undefined, capturedAt)
+      if (current === generation.current) onAnalyze(prepared)
     } catch (cause) {
       if (current === generation.current)
         setError(
