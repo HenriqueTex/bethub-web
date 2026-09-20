@@ -42,6 +42,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
+import { DecimalInput } from "@/components/decimal-input"
 import { Label } from "@/components/ui/label"
 import {
   Select,
@@ -721,10 +722,9 @@ function BetFormFields({
       )}
       <div className="grid gap-2">
         <Label htmlFor={`${idPrefix}-odd`}>Odd</Label>
-        <Input
+        <DecimalInput
           id={`${idPrefix}-odd`}
           name="odd"
-          type="number"
           step="0.001"
           min="1.01"
           required
@@ -733,10 +733,9 @@ function BetFormFields({
       </div>
       <div className="grid gap-2">
         <Label htmlFor={`${idPrefix}-units`}>Unidades</Label>
-        <Input
+        <DecimalInput
           id={`${idPrefix}-units`}
           name="units"
-          type="number"
           step="0.01"
           min="0.01"
           required
@@ -1201,9 +1200,8 @@ function SurebetCreateForm({
           <div className="mt-4 grid gap-4 md:grid-cols-[220px_1fr]">
             <div className="grid gap-2">
               <Label htmlFor="surebet-investment">Investimento total</Label>
-              <Input
+              <DecimalInput
                 id="surebet-investment"
-                type="number"
                 step="0.01"
                 min="0"
                 value={investment}
@@ -1362,9 +1360,8 @@ function SurebetCreateForm({
                       <div className="grid grid-cols-2 gap-3 md:grid-cols-6">
                         <div className="grid gap-2">
                       <Label htmlFor={`surebet-leg-value-${leg.id}`}>Valor</Label>
-                      <Input
+                      <DecimalInput
                         id={`surebet-leg-value-${leg.id}`}
-                        type="number"
                         step="0.01"
                         min="0"
                         value={
@@ -1383,9 +1380,8 @@ function SurebetCreateForm({
                     </div>
                     <div className="grid gap-2">
                       <Label htmlFor={`surebet-leg-odd-${leg.id}`}>ODD</Label>
-                      <Input
+                      <DecimalInput
                         id={`surebet-leg-odd-${leg.id}`}
-                        type="number"
                         step="0.001"
                         min="1.01"
                         value={leg.odd}
@@ -1414,9 +1410,8 @@ function SurebetCreateForm({
                     </div>
                     <div className="grid gap-2">
                       <Label htmlFor={`surebet-leg-commission-${leg.id}`}>Comissão</Label>
-                      <Input
+                      <DecimalInput
                         id={`surebet-leg-commission-${leg.id}`}
-                        type="number"
                         step="0.01"
                         min="0"
                         max="100"
@@ -1429,9 +1424,8 @@ function SurebetCreateForm({
                     </div>
                     <div className="grid gap-2">
                       <Label htmlFor={`surebet-leg-cashback-${leg.id}`}>Cashback</Label>
-                      <Input
+                      <DecimalInput
                         id={`surebet-leg-cashback-${leg.id}`}
-                        type="number"
                         step="0.01"
                         min="0"
                         max="100"
@@ -1444,9 +1438,8 @@ function SurebetCreateForm({
                     </div>
                     <div className="grid gap-2">
                       <Label htmlFor={`surebet-leg-boost-${leg.id}`}>Aumento</Label>
-                      <Input
+                      <DecimalInput
                         id={`surebet-leg-boost-${leg.id}`}
-                        type="number"
                         step="0.01"
                         min="0"
                         max="100"
@@ -2029,10 +2022,9 @@ export default function BetsView({
             </p>
             <div className="grid gap-2">
               <Label htmlFor="cashoutAmount">Valor recebido (R$)</Label>
-              <Input
+              <DecimalInput
                 id="cashoutAmount"
                 name="cashoutAmount"
-                type="number"
                 step="0.01"
                 min="0"
                 required

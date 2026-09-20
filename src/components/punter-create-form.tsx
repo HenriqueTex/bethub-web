@@ -4,6 +4,7 @@ import { useEffect, useReducer, useRef, useState, type FormEvent } from "react"
 import { Undo2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { DecimalInput } from "@/components/decimal-input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { BetImportInput } from "@/components/bet-import-input"
@@ -236,17 +237,23 @@ export function PunterCreateForm({
             </span>
           )}
         </Label>
-        <Input
-          id={"create-bet-" + key}
-          name={key}
-          className={cn(
-            "h-11 min-w-0",
-            draft.imported[key] && "border-emerald-600/60"
-          )}
-          value={fields[key]}
-          onChange={(event) => edit(key, event.target.value)}
-          {...options}
-        />
+        {(() => {
+          const { type, ...rest } = options
+          const Control = type === "number" ? DecimalInput : Input
+          return (
+            <Control
+              id={"create-bet-" + key}
+              name={key}
+              className={cn(
+                "h-11 min-w-0",
+                draft.imported[key] && "border-emerald-600/60"
+              )}
+              value={fields[key]}
+              onChange={(event) => edit(key, event.target.value)}
+              {...(type === "number" ? rest : options)}
+            />
+          )
+        })()}
       </div>
     )
   }
@@ -464,10 +471,8 @@ export function PunterCreateForm({
                   ))}
                 </div>
               </div>
-              <Input
+              <DecimalInput
                 id="create-bet-amount"
-                type="number"
-                inputMode="decimal"
                 min="0.01"
                 step={fields.amountMode === "money" ? "0.01" : "any"}
                 required
