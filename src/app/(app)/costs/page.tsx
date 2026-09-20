@@ -13,6 +13,7 @@ import {
   DialogTitle
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
+import { DecimalInput } from "@/components/decimal-input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import {
@@ -311,11 +312,10 @@ export default function CostsPage() {
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="grid gap-2">
                 <Label htmlFor="cost-amount">Valor</Label>
-                <Input
+                <DecimalInput
                   id="cost-amount"
                   name="amount"
                   required
-                  type="number"
                   step="0.01"
                   min="0.01"
                   defaultValue={editing?.amount}

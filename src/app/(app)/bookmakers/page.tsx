@@ -19,6 +19,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
+import { DecimalInput } from "@/components/decimal-input"
 import { Label } from "@/components/ui/label"
 import {
   Select,
@@ -394,15 +395,17 @@ export default function BookmakersPage() {
               <Input id="label" name="label" placeholder="ex: conta principal" />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="initialDeposit">Depósito inicial (opcional)</Label>
-              <Input
+              <Label htmlFor="initialDeposit">Saldo atual (opcional)</Label>
+              <DecimalInput
                 id="initialDeposit"
                 name="initialDeposit"
-                type="number"
-                step="0.01"
                 min="0"
                 placeholder="0,00"
               />
+              <p className="text-xs text-muted-foreground">
+                Quanto há na conta hoje. Entra como o primeiro lançamento do
+                extrato, e o saldo passa a evoluir a partir dele.
+              </p>
             </div>
             <Button type="submit" disabled={saving}>
               {saving ? "Salvando..." : "Salvar"}
@@ -432,7 +435,7 @@ export default function BookmakersPage() {
                 </SelectItem>
               </SelectContent>
             </Select>
-            <Input name="amount" type="number" step="0.01" min="0.01" required placeholder="Valor" />
+            <DecimalInput name="amount" step="0.01" min="0.01" required placeholder="Valor" />
             <Button type="submit" disabled={saving}>
               Registrar
             </Button>

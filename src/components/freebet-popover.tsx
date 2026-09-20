@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { Check, Circle, Gift } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { DecimalInput } from "@/components/decimal-input"
 import { Label } from "@/components/ui/label"
 import {
   Popover,
@@ -166,9 +166,8 @@ export function FreebetPopover({
                   <Label htmlFor={`${field("fb")}-value`} className="text-xs">
                     Valor Freebet
                   </Label>
-                  <Input
+                  <DecimalInput
                     id={`${field("fb")}-value`}
-                    type="number"
                     step="0.01"
                     min="0"
                     placeholder="R$"
@@ -180,9 +179,8 @@ export function FreebetPopover({
                   <Label htmlFor={`${field("fb")}-extraction`} className="text-xs">
                     Extração (%)
                   </Label>
-                  <Input
+                  <DecimalInput
                     id={`${field("fb")}-extraction`}
-                    type="number"
                     step="0.01"
                     min="0"
                     max="100"

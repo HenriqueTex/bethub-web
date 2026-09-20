@@ -11,7 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
+import { DecimalInput } from "@/components/decimal-input"
 import { Label } from "@/components/ui/label"
 import { formatBRL } from "@/lib/format"
 import { resources } from "@/lib/resources"
@@ -56,9 +56,8 @@ export default function SettingsPage() {
           <CardContent className="mt-4">
             <div className="grid max-w-xs gap-2">
               <Label htmlFor="unitValue">1 unidade (R$)</Label>
-              <Input
+              <DecimalInput
                 id="unitValue"
-                type="number"
                 step="0.01"
                 min="0.01"
                 required
