@@ -5,6 +5,7 @@ import { Undo2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { DecimalInput } from "@/components/decimal-input"
+import { GameAutocomplete } from "@/components/game-autocomplete"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { BetImportInput } from "@/components/bet-import-input"
@@ -416,11 +417,27 @@ export function PunterCreateForm({
             {input("eventDate", "Data do jogo", { type: "datetime-local" })}
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
-            {input("event", "Evento", {
-              required: true,
-              placeholder: "Cruzeiro x Atlético-MG",
-              maxLength: 200
-            })}
+            <div className="grid min-w-0 gap-2">
+              <Label htmlFor="create-bet-event">
+                Evento
+                {draft.imported.event && (
+                  <span className="text-[11px] font-normal text-emerald-600 dark:text-emerald-400">
+                    Importado
+                  </span>
+                )}
+              </Label>
+              <GameAutocomplete
+                id="create-bet-event"
+                name="event"
+                required
+                maxLength={200}
+                placeholder="Cruzeiro x Atlético-MG"
+                className={cn("h-11 min-w-0", draft.imported.event && "border-emerald-600/60")}
+                value={fields.event}
+                onValueChange={(valor) => edit("event", valor)}
+                onSelect={(jogo) => edit("eventDate", localDate(jogo.startsAt))}
+              />
+            </div>
             {input("selection", "Seleção (aposta)", {
               required: true,
               placeholder: "Cruzeiro vence, Over 2.5…",

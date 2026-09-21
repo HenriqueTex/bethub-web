@@ -252,6 +252,14 @@ export interface CostSummary {
   }[]
 }
 
+export interface GameOption {
+  id: number
+  name: string
+  sport: string
+  competition: string | null
+  startsAt: string
+}
+
 export const resources = {
   bookmakers: {
     list: () => apiFetch<Bookmaker[]>("/bookmakers"),
@@ -281,6 +289,9 @@ export const resources = {
         body: JSON.stringify(data),
       }),
     remove: (id: number) => apiFetch<void>(`/transactions/${id}`, { method: "DELETE" }),
+  },
+  games: {
+    list: () => apiFetch<GameOption[]>("/games"),
   },
   costs: {
     list: () => apiFetch<Cost[]>("/costs"),

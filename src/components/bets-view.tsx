@@ -44,6 +44,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
 import { DecimalInput } from "@/components/decimal-input"
+import { GameAutocomplete } from "@/components/game-autocomplete"
 import { Label } from "@/components/ui/label"
 import {
   Select,
@@ -162,6 +163,7 @@ interface SurebetDetails {
   marketName: string
   sport: string
   competition: string
+  eventDate: string
   placedAt: string
 }
 
@@ -845,6 +847,7 @@ function surebetDetailsFromAnalysis(analysis: BetImageAnalysisResult | null): Su
     marketName: analysis?.marketName ?? analyzedMarket ?? "",
     sport: analysis?.sport ?? "",
     competition: analysis?.competition ?? "",
+    eventDate: "",
     placedAt: toDateTimeLocalValue(analysis?.placedAt) || nowDateTimeLocalValue(),
   }
 }
@@ -951,6 +954,7 @@ function SurebetCreateForm({
       marketName: current.marketName || analyzedDetails.marketName,
       sport: current.sport || analyzedDetails.sport,
       competition: current.competition || analyzedDetails.competition,
+      eventDate: current.eventDate || analyzedDetails.eventDate,
       placedAt: current.placedAt || analyzedDetails.placedAt,
     }))
 
@@ -1102,16 +1106,23 @@ function SurebetCreateForm({
           <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-[4fr_2fr_2fr_1fr_1fr]">
             <div className="grid gap-2">
               <Label htmlFor="surebet-event">Evento</Label>
-              <Input
+              <GameAutocomplete
                 id="surebet-event"
                 name="event"
                 required
                 placeholder="Cruzeiro x Galo"
                 value={details.event}
-                onChange={(event) =>
-                  setDetails((current) => ({ ...current, event: event.target.value }))
+                onValueChange={(valor) =>
+                  setDetails((current) => ({ ...current, event: valor }))
+                }
+                onSelect={(jogo) =>
+                  setDetails((current) => ({
+                    ...current,
+                    eventDate: toDateTimeLocalValue(jogo.startsAt),
+                  }))
                 }
               />
+              <input type="hidden" name="eventDate" value={details.eventDate} />
             </div>
             <div className="grid gap-2">
               <Label>Tipster</Label>
