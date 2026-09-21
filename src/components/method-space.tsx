@@ -87,65 +87,92 @@ export default function MethodSpace({
   }
 
   const profitPositive = (summary?.profit ?? 0) >= 0
+  // No surebet, lucro e ROI já aparecem na calculadora (por operação), e o resumo
+  // desce para depois do formulário — que é o que se usa ao abrir a tela.
+  const resumoAbaixo = createFormVariant === "surebet"
+
+  const cards = (
+    <div
+      className={cn(
+        "mx-auto grid max-w-6xl grid-cols-1 min-[400px]:grid-cols-2 gap-2 sm:gap-4 [&>div]:min-w-0 [&_[data-slot=card-header]]:px-3 [&_[data-slot=card-content]]:px-3 sm:[&_[data-slot=card-header]]:px-6 sm:[&_[data-slot=card-content]]:px-6",
+        resumoAbaixo ? "xl:grid-cols-2" : "xl:grid-cols-4"
+      )}
+    >
+      {!resumoAbaixo && (
+        <>
+          <Card className="py-4">
+            <CardHeader className="pb-0">
+              <CardDescription>{summaryCurrentMonth ? "Lucro no mês" : tagline}</CardDescription>
+              <CardTitle className={cn("text-2xl", profitPositive ? "text-profit" : "text-loss")}>
+                {formatSigned(summary?.profit)}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="text-xs text-muted-foreground">
+              {summaryCurrentMonth ? currentMonth.label : "lucro total"} ·{" "}
+              {summary ? formatSignedUnits(summary.profitUnits) : "—"}
+            </CardContent>
+          </Card>
+          <Card className="py-4">
+            <CardHeader className="pb-0">
+              <CardDescription>ROI</CardDescription>
+              <CardTitle className="text-2xl">
+                {summary ? formatPercent(summary.roi) : "—"}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="text-xs text-muted-foreground">
+              sobre {formatBRL(summary?.staked)} apostados
+              {summaryCurrentMonth ? " no mês" : ""}
+            </CardContent>
+          </Card>
+        </>
+      )}
+      <Card className="py-4">
+        <CardHeader className="pb-0">
+          <CardDescription>Taxa de acerto</CardDescription>
+          <CardTitle className="text-2xl">
+            {summary ? formatPercent(summary.hitRate) : "—"}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="text-xs text-muted-foreground">
+          {summary?.wins ?? 0} greens · {summary?.losses ?? 0} reds
+          {summaryCurrentMonth ? " no mês" : ""}
+        </CardContent>
+      </Card>
+      <Card className="py-4">
+        <CardHeader className="pb-0">
+          <CardDescription>Em aberto</CardDescription>
+          <CardTitle className="text-2xl">{summary?.pendingBets ?? "—"}</CardTitle>
+        </CardHeader>
+        <CardContent className="text-xs text-muted-foreground">
+          {formatBRL(summary?.pendingStake)} em jogo
+          {summaryCurrentMonth ? " no mês" : ""}
+        </CardContent>
+      </Card>
+    </div>
+  )
 
   return (
     <div className="space-y-6">
-      <div className="mx-auto max-w-6xl"><p className="mb-1 text-xs font-medium uppercase tracking-widest text-primary">Registro de apostas</p><h1 className="text-2xl font-bold">{methodName}</h1><p className="mt-1 text-sm text-muted-foreground">{methodName === "Surebet" ? "Calcule os cenários e registre cada perna da operação." : "Seu registro rápido, com todos os números sob controle."}</p></div>
-      <div className="mx-auto grid max-w-6xl grid-cols-1 min-[400px]:grid-cols-2 gap-2 sm:gap-4 xl:grid-cols-4 [&>div]:min-w-0 [&_[data-slot=card-header]]:px-3 [&_[data-slot=card-content]]:px-3 sm:[&_[data-slot=card-header]]:px-6 sm:[&_[data-slot=card-content]]:px-6">
-        <Card className="py-4">
-          <CardHeader className="pb-0">
-            <CardDescription>{summaryCurrentMonth ? "Lucro no mês" : tagline}</CardDescription>
-            <CardTitle
-              className={cn(
-                "text-2xl",
-                profitPositive ? "text-profit" : "text-loss"
-              )}
-            >
-              {formatSigned(summary?.profit)}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="text-xs text-muted-foreground">
-            {summaryCurrentMonth ? currentMonth.label : "lucro total"} ·{" "}
-            {summary ? formatSignedUnits(summary.profitUnits) : "—"}
-          </CardContent>
-        </Card>
-        <Card className="py-4">
-          <CardHeader className="pb-0">
-            <CardDescription>ROI</CardDescription>
-            <CardTitle className="text-2xl">{summary ? formatPercent(summary.roi) : "—"}</CardTitle>
-          </CardHeader>
-          <CardContent className="text-xs text-muted-foreground">
-            sobre {formatBRL(summary?.staked)} apostados
-            {summaryCurrentMonth ? " no mês" : ""}
-          </CardContent>
-        </Card>
-        <Card className="py-4">
-          <CardHeader className="pb-0">
-            <CardDescription>Taxa de acerto</CardDescription>
-            <CardTitle className="text-2xl">{summary ? formatPercent(summary.hitRate) : "—"}</CardTitle>
-          </CardHeader>
-          <CardContent className="text-xs text-muted-foreground">
-            {summary?.wins ?? 0} greens · {summary?.losses ?? 0} reds
-            {summaryCurrentMonth ? " no mês" : ""}
-          </CardContent>
-        </Card>
-        <Card className="py-4">
-          <CardHeader className="pb-0">
-            <CardDescription>Em aberto</CardDescription>
-            <CardTitle className="text-2xl">{summary?.pendingBets ?? "—"}</CardTitle>
-          </CardHeader>
-          <CardContent className="text-xs text-muted-foreground">
-            {formatBRL(summary?.pendingStake)} em jogo
-            {summaryCurrentMonth ? " no mês" : ""}
-          </CardContent>
-        </Card>
+      <div className="mx-auto max-w-6xl">
+        <p className="mb-1 text-xs font-medium uppercase tracking-widest text-primary">
+          Registro de apostas
+        </p>
+        <h1 className="text-2xl font-bold">{methodName}</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          {methodName === "Surebet"
+            ? "Calcule os cenários e registre cada perna da operação."
+            : "Seu registro rápido, com todos os números sob controle."}
+        </p>
       </div>
+
+      {!resumoAbaixo && cards}
 
       <BetsView
         title={methodName}
         lockedMethod={method}
         featuredCreateForm={featuredCreateForm}
         createFormVariant={createFormVariant}
+        statsSlot={resumoAbaixo ? cards : null}
         onDataChanged={reloadSummary}
       />
     </div>

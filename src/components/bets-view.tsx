@@ -3,6 +3,7 @@
 import {
   ChangeEvent,
   FormEvent,
+  type ReactNode,
   useCallback,
   useEffect,
   useMemo,
@@ -185,7 +186,7 @@ function createSurebetLeg(id: number): SurebetLeg {
     selection: "",
     value: "",
     type: "back",
-    odd: "",
+    odd: "1.00",
     commission: "",
     cashback: "",
     boost: "",
@@ -221,6 +222,13 @@ function clampPercent(value: number) {
   return Math.max(0, Math.min(100, value))
 }
 
+function tamanhoDoValor(texto: string) {
+  if (texto.length > 11) return "text-xs"
+  if (texto.length > 10) return "text-sm"
+  if (texto.length > 9) return "text-base"
+  return "text-lg"
+}
+
 function calculateEffectiveOdd(
   type: SurebetLegType,
   odd: number,
@@ -231,8 +239,9 @@ function calculateEffectiveOdd(
   const boostRate = clampPercent(boost) / 100
   let effectiveOdd = 0
 
+  if (odd <= 1) return 0
+
   if (type === "lay") {
-    if (odd <= 1) return 0
     effectiveOdd = Math.max(0, (odd - commissionRate) / (odd - 1))
   } else {
     effectiveOdd = 1 + (odd - 1) * (1 - commissionRate)
@@ -859,6 +868,7 @@ function SurebetCreateForm({
   const [details, setDetails] = useState<SurebetDetails>(() => surebetDetailsFromAnalysis(prefill))
   const [operationNotes, setOperationNotes] = useState(prefill?.notes ?? "")
   const [legImages, setLegImages] = useState<Record<number, SurebetLegImageState>>({})
+  const [returnDrafts, setReturnDrafts] = useState<Record<number, string>>({})
   const legImagePreviewsRef = useRef(new Map<number, string>())
 
   const activeAccounts = useMemo(() => accounts.filter((account) => account.active), [accounts])
@@ -1089,51 +1099,99 @@ function SurebetCreateForm({
             automático.
           </p>
 
-          <div className="mt-4 grid gap-4 xl:grid-cols-[190px_minmax(0,1fr)]">
+          <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-[4fr_2fr_2fr_1fr_1fr]">
+            <div className="grid gap-2">
+              <Label htmlFor="surebet-event">Evento</Label>
+              <Input
+                id="surebet-event"
+                name="event"
+                required
+                placeholder="Cruzeiro x Galo"
+                value={details.event}
+                onChange={(event) =>
+                  setDetails((current) => ({ ...current, event: event.target.value }))
+                }
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label>Tipster</Label>
+              <Select name="tipsterId">
+                <SelectTrigger className="!w-full min-w-0">
+                  <SelectValue placeholder="Aposta própria" />
+                </SelectTrigger>
+                <SelectContent>
+                  {tipsters
+                    .filter((tipster) => tipster.active)
+                    .map((tipster) => (
+                      <SelectItem key={tipster.id} value={String(tipster.id)}>
+                        {tipster.name}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+            </div>
             <div className="grid gap-2">
               <Label htmlFor="surebet-investment">Investimento total</Label>
               <DecimalInput
                 id="surebet-investment"
                 step="0.01"
                 min="0"
-                value={investment}
-                onChange={(event) => setInvestment(event.target.value)}
+                value={
+                  calculation.manualMode
+                    ? String(roundMoney(calculation.investment))
+                    : investment
+                }
+                onChange={(event) => {
+                  setInvestment(event.target.value)
+                  if (calculation.manualMode) {
+                    setLegs((current) => current.map((leg) => ({ ...leg, value: "" })))
+                    setReturnDrafts({})
+                  }
+                }}
+                className={cn(calculation.manualMode && "text-muted-foreground")}
               />
             </div>
-            <div className="grid min-w-0 gap-3 min-[480px]:grid-cols-2 xl:grid-cols-4">
-              <div className="rounded-md border bg-card p-3">
-                <p className="text-xs text-muted-foreground">Retorno garantido</p>
-                <p className="mt-1 font-semibold">{formatBRL(calculation.guaranteedReturn)}</p>
-              </div>
-              <div className="rounded-md border bg-card p-3">
-                <p className="text-xs text-muted-foreground">Lucro</p>
-                <p
-                  className={cn(
-                    "mt-1 font-semibold",
-                    calculation.guaranteedProfit >= 0 ? "text-profit" : "text-loss"
-                  )}
-                >
-                  {formatSigned(calculation.guaranteedProfit)}
-                </p>
-              </div>
-              <div className="rounded-md border bg-card p-3">
-                <p className="text-xs text-muted-foreground">ROI</p>
-                <p className="mt-1 font-semibold">{formatPercent(calculation.roi)}</p>
-              </div>
-              <div className="rounded-md border bg-card p-3">
-                <p className="text-xs text-muted-foreground">Odd garantida</p>
-                <p className="mt-1 font-semibold">
-                  {formatOdd(calculation.guaranteedOdd || 0)}
-                </p>
-              </div>
+            <div className="grid gap-2">
+              <Label>Lucro</Label>
+              <p
+                className={cn(
+                  "numeric flex h-9 items-center whitespace-nowrap font-semibold",
+                  tamanhoDoValor(formatSigned(calculation.guaranteedProfit)),
+                  calculation.guaranteedProfit >= 0 ? "text-profit" : "text-loss"
+                )}
+              >
+                {formatSigned(calculation.guaranteedProfit)}
+              </p>
+            </div>
+            <div className="grid gap-2">
+              <Label>ROI</Label>
+              <p
+                className={cn(
+                  "numeric flex h-9 items-center whitespace-nowrap font-semibold",
+                  tamanhoDoValor(formatPercent(calculation.roi))
+                )}
+              >
+                {formatPercent(calculation.roi)}
+              </p>
             </div>
           </div>
 
-          <div className="mt-4 space-y-3">
+          <div className="mt-3 flex flex-wrap gap-x-6 gap-y-1 text-xs text-muted-foreground">
+            <span>
+              Retorno garantido{" "}
+              <strong className="text-foreground">{formatBRL(calculation.guaranteedReturn)}</strong>
+            </span>
+            <span>
+              Odd garantida{" "}
+              <strong className="text-foreground">{formatOdd(calculation.guaranteedOdd || 0)}</strong>
+            </span>
+          </div>
+
+          <div className="mt-4 divide-y">
             {legs.map((leg, index) => {
               const calculatedLeg = calculation.legs.find((item) => item.id === leg.id)
               return (
-                <div key={leg.id} className="rounded-md border bg-card p-3">
+                <div key={leg.id} className="py-4 first:pt-2">
                   <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
                     <div className="flex flex-wrap items-center gap-2">
                       <Badge variant="outline">Perna {index + 1}</Badge>
@@ -1141,29 +1199,6 @@ function SurebetCreateForm({
                         <Badge className="border-transparent bg-amber-500/15 text-warning">
                           Freebet
                         </Badge>
-                      )}
-                      <span className="text-sm text-muted-foreground">
-                        Stake {formatBRL(calculatedLeg?.stake)}
-                      </span>
-                      {!!calculatedLeg?.returnAmount && (
-                        <span className="text-sm text-muted-foreground">
-                          · Retorno {formatBRL(calculatedLeg.returnAmount)}
-                        </span>
-                      )}
-                      {!!calculatedLeg?.freebetGenerated && (
-                        <span className="text-sm text-warning">
-                          · Gera freebet {formatBRL(calculatedLeg.freebetGenerated)}
-                        </span>
-                      )}
-                      {!!calculatedLeg && calculation.valid && (
-                        <span
-                          className={cn(
-                            "text-sm font-medium",
-                            calculatedLeg.scenarioNet >= 0 ? "text-profit" : "text-loss"
-                          )}
-                        >
-                          · Se vencer: {formatSigned(calculatedLeg.scenarioNet)}
-                        </span>
                       )}
                     </div>
                     <div className="flex items-center gap-1">
@@ -1251,7 +1286,9 @@ function SurebetCreateForm({
                       </div>
                       <div className="surebet-fields">
                         <div className="grid gap-2">
-                      <Label htmlFor={`surebet-leg-value-${leg.id}`}>Valor</Label>
+                      <Label htmlFor={`surebet-leg-value-${leg.id}`}>
+                        {leg.type === "lay" ? "Responsabilidade" : "Valor"}
+                      </Label>
                       <DecimalInput
                         id={`surebet-leg-value-${leg.id}`}
                         step="0.01"
@@ -1263,13 +1300,55 @@ function SurebetCreateForm({
                               ? String(calculatedLeg.stake)
                               : ""
                         }
-                        onChange={(event) => updateLeg(leg.id, { value: event.target.value })}
+                        onChange={(event) => {
+                          setReturnDrafts((current) => {
+                            const proximo = { ...current }
+                            delete proximo[leg.id]
+                            return proximo
+                          })
+                          updateLeg(leg.id, { value: event.target.value })
+                        }}
                         placeholder="0.00"
                         className={cn(
                           leg.value === "" && calculatedLeg?.stake ? "text-muted-foreground" : ""
                         )}
                       />
                     </div>
+                    {leg.type === "lay" && (
+                      <div className="grid gap-2">
+                        <Label htmlFor={`surebet-leg-return-${leg.id}`}>Retorno</Label>
+                        <DecimalInput
+                          id={`surebet-leg-return-${leg.id}`}
+                          step="0.01"
+                          min="0"
+                          value={
+                            returnDrafts[leg.id] ??
+                            (calculatedLeg?.stake && calculatedLeg.distributionFactor
+                              ? String(
+                                  roundMoney(
+                                    calculatedLeg.stake * calculatedLeg.distributionFactor
+                                  )
+                                )
+                              : "")
+                          }
+                          onChange={(event) => {
+                            const digitado = event.target.value
+                            const fator = calculatedLeg?.distributionFactor ?? 0
+                            setReturnDrafts((current) => ({ ...current, [leg.id]: digitado }))
+                            updateLeg(leg.id, {
+                              value:
+                                digitado === "" || fator <= 0
+                                  ? ""
+                                  : String(roundMoney(toNumber(digitado) / fator)),
+                            })
+                          }}
+                          placeholder="0.00"
+                          className={cn(
+                            leg.value === "" && calculatedLeg?.stake ? "text-muted-foreground" : ""
+                          )}
+                        />
+                      </div>
+                    )}
                     <div className="grid gap-2">
                       <Label htmlFor={`surebet-leg-odd-${leg.id}`}>ODD</Label>
                       <DecimalInput
@@ -1278,8 +1357,12 @@ function SurebetCreateForm({
                         min="1.01"
                         value={leg.odd}
                         onChange={(event) => updateLeg(leg.id, { odd: event.target.value })}
-                        placeholder="2.10"
                       />
+                      {leg.type === "lay" && !!calculatedLeg?.effectiveOdd && (
+                        <p className="text-[11px] text-muted-foreground">
+                          {formatOdd(calculatedLeg.effectiveOdd)} back
+                        </p>
+                      )}
                     </div>
                     <div className="grid gap-2">
                       <Label>Back/Lay</Label>
@@ -1287,7 +1370,7 @@ function SurebetCreateForm({
                         type="button"
                         variant="outline"
                         className={cn(
-                          "h-10 justify-center font-semibold",
+                          "h-9 justify-center font-semibold",
                           leg.type === "back"
                             ? "border-primary/40 bg-primary/10 text-primary hover:bg-primary/20"
                             : "border-rose-500/40 bg-rose-500/10 text-loss hover:bg-rose-500/20 dark:text-loss"
@@ -1343,33 +1426,50 @@ function SurebetCreateForm({
                       </div>
                     </div>
                   </div>
+                  <div className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1">
+                    <span className="text-sm text-muted-foreground">
+                      Stake {formatBRL(calculatedLeg?.stake)}
+                    </span>
+                    {!!calculatedLeg?.returnAmount && (
+                      <span className="text-sm text-muted-foreground">
+                        · Retorno {formatBRL(calculatedLeg.returnAmount)}
+                      </span>
+                    )}
+                    {!!calculatedLeg?.freebetGenerated && (
+                      <span className="text-sm text-warning">
+                        · Gera freebet {formatBRL(calculatedLeg.freebetGenerated)}
+                      </span>
+                    )}
+                    {!!calculatedLeg && calculation.valid && (
+                      <span
+                        className={cn(
+                          "text-sm font-medium",
+                          calculatedLeg.scenarioNet >= 0 ? "text-profit" : "text-loss"
+                        )}
+                      >
+                        · Se vencer: {formatSigned(calculatedLeg.scenarioNet)}
+                      </span>
+                    )}
+                  </div>
                 </div>
               )
             })}
 
             {legs.length < MAX_SUREBET_LEGS && (
-              <Button type="button" variant="outline" onClick={addLeg}>
-                <Plus className="size-4" />
-                Adicionar perna ({legs.length}/{MAX_SUREBET_LEGS})
-              </Button>
+              <div className="pt-4">
+                <Button type="button" variant="outline" onClick={addLeg}>
+                  <Plus className="size-4" />
+                  Adicionar perna ({legs.length}/{MAX_SUREBET_LEGS})
+                </Button>
+              </div>
             )}
           </div>
         </div>
 
         <div className="grid gap-4 md:grid-cols-2">
-          <div className="grid gap-2 md:col-span-2">
-            <Label htmlFor="surebet-event">Evento</Label>
-            <Input
-              id="surebet-event"
-              name="event"
-              required
-              placeholder="Cruzeiro x Galo"
-              value={details.event}
-              onChange={(event) =>
-                setDetails((current) => ({ ...current, event: event.target.value }))
-              }
-            />
-          </div>
+          <details className="rounded-md border p-3 md:col-span-2">
+            <summary className="text-sm font-medium">Mais detalhes</summary>
+            <div className="mt-4 grid gap-4 md:grid-cols-2">
           <div className="grid gap-2">
             <Label htmlFor="surebet-selection">Resumo da operação</Label>
             <Input
@@ -1401,9 +1501,6 @@ function SurebetCreateForm({
               ))}
             </datalist>
           </div>
-          <details className="rounded-md border p-3 md:col-span-2">
-            <summary className="text-sm font-medium">Mais detalhes</summary>
-            <div className="mt-4 grid gap-4 md:grid-cols-2">
           <div className="grid gap-2">
             <Label htmlFor="surebet-sport">Esporte (opcional)</Label>
             <Input
@@ -1427,23 +1524,6 @@ function SurebetCreateForm({
                 setDetails((current) => ({ ...current, competition: event.target.value }))
               }
             />
-          </div>
-          <div className="grid gap-2">
-            <Label>Tipster (opcional)</Label>
-            <Select name="tipsterId">
-              <SelectTrigger className="!w-full min-w-0">
-                <SelectValue placeholder="Aposta própria" />
-              </SelectTrigger>
-              <SelectContent>
-                {tipsters
-                  .filter((tipster) => tipster.active)
-                  .map((tipster) => (
-                    <SelectItem key={tipster.id} value={String(tipster.id)}>
-                      {tipster.name}
-                    </SelectItem>
-                  ))}
-              </SelectContent>
-            </Select>
           </div>
           <div className="grid gap-2">
             <Label htmlFor="surebet-placedAt">Data da aposta (opcional)</Label>
@@ -1489,6 +1569,8 @@ interface BetsViewProps {
   title?: string
   featuredCreateForm?: boolean
   createFormVariant?: CreateFormVariant
+  /** Renderizado entre o formulário e a lista, para o resumo não empurrar o formulário. */
+  statsSlot?: ReactNode
   onDataChanged?: () => void
 }
 
@@ -1497,6 +1579,7 @@ export default function BetsView({
   title = "Apostas",
   featuredCreateForm = false,
   createFormVariant = "dialog",
+  statsSlot,
   onDataChanged,
 }: BetsViewProps) {
   const [bets, setBets] = useState<Paginated<Bet> | null>(null)
@@ -1748,6 +1831,7 @@ export default function BetsView({
         </div>
       )}
 
+      {statsSlot}
       {inlineCreateForm && <h2 className="text-lg font-semibold">Apostas registradas</h2>}
 
       <div className="bet-filters flex flex-wrap items-end gap-3 rounded-lg border bg-card p-4">

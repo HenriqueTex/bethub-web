@@ -10,6 +10,7 @@
   --font-sans: var(--font-roboto);
   --font-mono: var(--font-roboto-mono);
   --font-heading: var(--font-roboto);
+  --color-field: var(--field);
   --color-profit: var(--profit);
   --color-loss: var(--loss);
   --color-warning: var(--warning);
@@ -76,6 +77,7 @@
   --destructive: var(--loss);
   --border: #d5dfe9;
   --input: #a5b5c6;
+  --field: #ffffff;
   --ring: #0284c7;
   --chart-1: var(--profit);
   --chart-2: var(--loss);
@@ -115,6 +117,7 @@
   --ai-border: #40856f;
   --border: #2a3a4e;
   --input: #53657d;
+  --field: #070d16;
   --ring: #7bc9f4;
   --sidebar: #101925;
 }
@@ -146,6 +149,7 @@
   --destructive: var(--loss);
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
+  --field: oklch(0.08 0 0);
   --ring: oklch(0.556 0 0);
   --sidebar: oklch(0.205 0 0);
 }
