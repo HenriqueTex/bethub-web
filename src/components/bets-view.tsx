@@ -1704,6 +1704,7 @@ export default function BetsView({
     if (get("stakeAmount")) payload.stakeAmount = Number(get("stakeAmount"))
     if (get("placedAt")) payload.placedAt = new Date(get("placedAt")).toISOString()
     if (get("eventDate")) payload.eventDate = new Date(get("eventDate")).toISOString()
+    payload.notificationsEnabled = get("notificationsEnabled") !== "false"
 
     const generatesFreebet = get("generatesFreebet") === "true"
     payload.isFreebet = get("isFreebet") === "true"

@@ -16,6 +16,9 @@ const robotoMono = Roboto_Mono({
 export const metadata: Metadata = {
   title: "BetHub",
   description: "Controlador pessoal de apostas",
+  manifest: "/manifest.webmanifest",
+  appleWebApp: { capable: true, title: "BetHub", statusBarStyle: "black-translucent" },
+  icons: { icon: "/icon-192.png", apple: "/icon-192.png" },
 };
 
 export default function RootLayout({

@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useReducer, useRef, useState, type FormEvent } from "react"
-import { Undo2 } from "lucide-react"
+import { Bell, Undo2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { DecimalInput } from "@/components/decimal-input"
@@ -9,6 +9,8 @@ import { GameAutocomplete } from "@/components/game-autocomplete"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { BetImportInput } from "@/components/bet-import-input"
+import { toast } from "sonner"
+import { enablePush, pushSupported } from "@/lib/push"
 import { FreebetPopover, emptyFreebet } from "@/components/freebet-popover"
 import {
   resources,
@@ -111,6 +113,7 @@ export function PunterCreateForm({
   )
   const [freebet, setFreebet] = useState(emptyFreebet)
   const [receipt, setReceipt] = useState<File | null>(null)
+  const [notificar, setNotificar] = useState(true)
   const [loading, setLoading] = useState(false)
   const [status, setStatus] = useState("")
   const [error, setError] = useState("")
@@ -207,6 +210,31 @@ export function PunterCreateForm({
 
   function edit(key: PunterField, value: string) {
     dispatch({ type: "edit", values: { [key]: value } })
+  }
+
+  /**
+   * O sino guarda duas coisas diferentes: o aviso desta aposta e a permissão do
+   * navegador. Ligar a primeira sem a segunda deixaria o usuário esperando um
+   * aviso que nunca chega, então a permissão é pedida no mesmo gesto.
+   */
+  async function toggleNotificar() {
+    const proximo = !notificar
+    setNotificar(proximo)
+
+    if (!proximo) return
+
+    if (!pushSupported()) {
+      toast.warning("Este navegador não envia notificações")
+      return
+    }
+
+    const estado = await enablePush().catch(() => "off" as const)
+
+    if (estado === "denied") {
+      toast.error("Notificações bloqueadas nas permissões do navegador")
+    } else if (estado !== "on") {
+      toast.warning("Não foi possível ativar as notificações agora")
+    }
   }
 
   function changeMode(mode: "money" | "units") {
@@ -439,7 +467,53 @@ export function PunterCreateForm({
                 onSelect={(jogo) => edit("eventDate", localDate(jogo.startsAt))}
               />
             </div>
-            {input("eventDate", "Data do jogo", { type: "datetime-local" })}
+            <div className="grid min-w-0 content-start gap-2">
+              <Label className="min-h-7" htmlFor="create-bet-eventDate">
+                Data do jogo
+                {draft.imported.eventDate && <span className="ai-badge">IA · conferir</span>}
+              </Label>
+              <div className="flex min-w-0 items-center gap-2">
+                <Input
+                  id="create-bet-eventDate"
+                  name="eventDate"
+                  type="datetime-local"
+                  className={cn(
+                    "h-11 min-w-0 flex-1 sm:max-w-56",
+                    draft.imported.eventDate && "ai-field"
+                  )}
+                  value={fields.eventDate}
+                  onChange={(event) => edit("eventDate", event.target.value)}
+                />
+                <button
+                  type="button"
+                  onClick={toggleNotificar}
+                  aria-pressed={notificar}
+                  title={
+                    notificar
+                      ? "Avisar quando este jogo começar"
+                      : "Sem aviso para este jogo"
+                  }
+                  aria-label={
+                    notificar
+                      ? "Avisar quando este jogo começar"
+                      : "Sem aviso para este jogo"
+                  }
+                  className={cn(
+                    "flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border transition-colors",
+                    notificar
+                      ? "border-ring bg-field text-foreground"
+                      : "border-input bg-field text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  <Bell className="size-5" fill={notificar ? "currentColor" : "none"} />
+                </button>
+              </div>
+              <input
+                type="hidden"
+                name="notificationsEnabled"
+                value={notificar ? "true" : "false"}
+              />
+            </div>
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
             {input("placedAt", "Data da aposta", { type: "datetime-local" })}
