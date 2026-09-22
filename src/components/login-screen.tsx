@@ -3,11 +3,12 @@
 import { FormEvent, MouseEvent, useEffect, useRef, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { Eye, EyeOff, ShieldCheck } from "lucide-react"
+import { ArrowRight, Eye, EyeOff, Loader2, ShieldCheck } from "lucide-react"
 import { ThemeSwitcher } from "@/components/theme-switcher"
 import { WelcomeOverlay } from "@/components/welcome-overlay"
 import { BrandMark } from "@/components/landing/brand-mark"
 import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { rippleSweep } from "@/components/ui/kinetic-grid"
@@ -16,6 +17,10 @@ import { cn } from "@/lib/utils"
 import { markWelcomeSeen } from "@/lib/welcome"
 
 const isDev = process.env.NODE_ENV === "development"
+
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
+
+type FieldErrors = { email?: string; password?: string }
 
 type Phase = "welcome" | "revealing" | "done"
 
@@ -32,6 +37,7 @@ export function LoginScreen({ showWelcome = false }: { showWelcome?: boolean }) 
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({})
   const [loading, setLoading] = useState(false)
   const [phase, setPhase] = useState<Phase>(showWelcome ? "welcome" : "done")
   const revealRef = useRef<HTMLDivElement>(null)
@@ -67,9 +73,22 @@ export function LoginScreen({ showWelcome = false }: { showWelcome?: boolean }) 
     setPhase("revealing")
   }
 
+  function validate() {
+    const found: FieldErrors = {}
+    if (!email.trim()) found.email = "Informe seu e-mail."
+    else if (!EMAIL_PATTERN.test(email.trim())) found.email = "Digite um e-mail válido."
+    if (!password) found.password = "Informe sua senha."
+    return found
+  }
+
   async function handleSubmit(event: FormEvent) {
     event.preventDefault()
     setError(null)
+
+    const found = validate()
+    setFieldErrors(found)
+    if (Object.keys(found).length > 0) return
+
     setLoading(true)
     try {
       await login(email, password)
@@ -144,7 +163,7 @@ export function LoginScreen({ showWelcome = false }: { showWelcome?: boolean }) 
                 desempenho.
               </p>
 
-              <form onSubmit={handleSubmit} className="mt-7 space-y-4">
+              <form onSubmit={handleSubmit} noValidate className="mt-7 space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="email" className="text-[13px]">
                     E-mail
@@ -152,38 +171,55 @@ export function LoginScreen({ showWelcome = false }: { showWelcome?: boolean }) 
                   <Input
                     id="email"
                     type="email"
+                    inputMode="email"
                     autoComplete="email"
                     placeholder="voce@exemplo.com"
-                    required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    aria-invalid={Boolean(error)}
-                    className="h-11 rounded-xl px-3.5"
+                    aria-invalid={Boolean(fieldErrors.email || error)}
+                    aria-describedby={fieldErrors.email ? "email-error" : undefined}
+                    disabled={loading}
+                    className="h-11 rounded-[17px] px-3.5"
                   />
+                  {fieldErrors.email && (
+                    <p id="email-error" role="alert" className="text-[12px] text-destructive">
+                      {fieldErrors.email}
+                    </p>
+                  )}
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="password" className="text-[13px]">
-                    Senha
-                  </Label>
+                  <div className="flex items-baseline justify-between gap-3">
+                    <Label htmlFor="password" className="text-[13px]">
+                      Senha
+                    </Label>
+                    <Link
+                      href="#"
+                      className="text-[12px] text-muted-foreground underline-offset-4 transition-colors hover:text-primary hover:underline"
+                    >
+                      Esqueci minha senha
+                    </Link>
+                  </div>
+
                   <div className="relative">
                     <Input
                       id="password"
                       type={showPassword ? "text" : "password"}
                       autoComplete="current-password"
                       placeholder="••••••••"
-                      required
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      aria-invalid={Boolean(error)}
-                      className="h-11 rounded-xl px-3.5 pr-11"
+                      aria-invalid={Boolean(fieldErrors.password || error)}
+                      aria-describedby={fieldErrors.password ? "password-error" : undefined}
+                      disabled={loading}
+                      className="h-11 rounded-[17px] px-3.5 pr-11"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword((value) => !value)}
                       aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
                       aria-pressed={showPassword}
-                      className="absolute inset-y-0 right-0 flex w-11 items-center justify-center rounded-r-xl text-muted-foreground transition-colors hover:text-foreground"
+                      className="absolute inset-y-0 right-0 flex w-11 items-center justify-center rounded-r-[17px] text-muted-foreground transition-colors hover:text-foreground"
                     >
                       {showPassword ? (
                         <EyeOff className="size-4" aria-hidden="true" />
@@ -192,7 +228,21 @@ export function LoginScreen({ showWelcome = false }: { showWelcome?: boolean }) 
                       )}
                     </button>
                   </div>
+
+                  {fieldErrors.password && (
+                    <p id="password-error" role="alert" className="text-[12px] text-destructive">
+                      {fieldErrors.password}
+                    </p>
+                  )}
                 </div>
+
+                <Label
+                  htmlFor="remember"
+                  className="w-fit gap-2.5 text-[12.5px] font-normal text-muted-foreground"
+                >
+                  <Checkbox id="remember" name="remember" disabled={loading} />
+                  Manter conectado por 30 dias
+                </Label>
 
                 {error && (
                   <p role="alert" className="text-sm text-destructive">
@@ -202,17 +252,27 @@ export function LoginScreen({ showWelcome = false }: { showWelcome?: boolean }) 
 
                 <Button
                   type="submit"
-                  className="h-11 w-full rounded-xl text-sm font-medium"
+                  className="h-11 w-full rounded-[17px] text-sm font-medium shadow-[0_0_0_1px_color-mix(in_oklab,var(--primary)_35%,transparent),0_16px_40px_-20px_color-mix(in_oklab,var(--primary)_80%,transparent)] hover:bg-brand-bright"
                   disabled={loading}
                 >
-                  {loading ? "Entrando..." : "Entrar"}
+                  {loading ? (
+                    <>
+                      <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+                      Entrando
+                    </>
+                  ) : (
+                    <>
+                      Entrar
+                      <ArrowRight className="size-4" aria-hidden="true" />
+                    </>
+                  )}
                 </Button>
 
                 {isDev && (
                   <Button
                     type="button"
                     variant="outline"
-                    className="h-11 w-full rounded-xl border-dashed text-sm font-normal"
+                    className="h-11 w-full rounded-[17px] border-dashed text-sm font-normal"
                     disabled={loading}
                     onClick={handleDevLogin}
                   >

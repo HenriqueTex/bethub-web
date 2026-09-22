@@ -1,8 +1,7 @@
 "use client"
 
 import { MouseEvent } from "react"
-import Link from "next/link"
-import { ArrowRight, UserPlus } from "lucide-react"
+import { ArrowRight, PlayCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { PortfolioPreview } from "./portfolio-preview"
 
@@ -50,21 +49,18 @@ export function SplashHero({
           >
             <Button
               onClick={onStart}
-              className="h-11 rounded-xl px-5 text-sm font-medium shadow-[0_0_0_1px_rgba(34,197,94,0.35),0_16px_40px_-18px_rgba(34,197,94,0.75)] hover:bg-brand-bright"
+              className="h-11 rounded-[17px] px-5 text-sm font-medium shadow-[0_0_0_1px_rgba(34,197,94,0.35),0_16px_40px_-18px_rgba(34,197,94,0.75)] hover:bg-brand-bright"
             >
               Começar agora
               <ArrowRight className="size-4" aria-hidden="true" />
             </Button>
 
             <Button
-              asChild
               variant="outline"
-              className="h-11 rounded-xl border-white/12 bg-white/[0.03] px-5 text-sm font-medium text-white hover:border-white/20 hover:bg-white/[0.07] hover:text-white"
+              className="h-11 rounded-[17px] border-white/12 bg-white/[0.03] px-5 text-sm font-medium text-white hover:border-white/20 hover:bg-white/[0.07] hover:text-white"
             >
-              <Link href="/register">
-                <UserPlus className="size-4" aria-hidden="true" />
-                Criar conta
-              </Link>
+              <PlayCircle className="size-4" aria-hidden="true" />
+              Ver demonstração
             </Button>
           </div>
 

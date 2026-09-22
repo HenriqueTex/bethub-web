@@ -27,7 +27,7 @@ export function SplashNavbar({
           </Button>
           <Button
             onClick={onStart}
-            className="h-9 rounded-lg px-4 text-[13.5px] font-medium shadow-[0_0_0_1px_rgba(34,197,94,0.35),0_8px_24px_-12px_rgba(34,197,94,0.6)] hover:bg-brand-bright"
+            className="h-9 rounded-[12px] px-4 text-[13.5px] font-medium shadow-[0_0_0_1px_rgba(34,197,94,0.35),0_8px_24px_-12px_rgba(34,197,94,0.6)] hover:bg-brand-bright"
           >
             Começar agora
           </Button>
