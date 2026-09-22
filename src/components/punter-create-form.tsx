@@ -413,10 +413,6 @@ export function PunterCreateForm({
             </div>
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
-            {input("placedAt", "Data da aposta", { type: "datetime-local" })}
-            {input("eventDate", "Data do jogo", { type: "datetime-local" })}
-          </div>
-          <div className="grid gap-4 sm:grid-cols-2">
             <div className="grid min-w-0 gap-2">
               <Label htmlFor="create-bet-event">
                 Evento
@@ -438,6 +434,10 @@ export function PunterCreateForm({
                 onSelect={(jogo) => edit("eventDate", localDate(jogo.startsAt))}
               />
             </div>
+            {input("eventDate", "Data do jogo", { type: "datetime-local" })}
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            {input("placedAt", "Data da aposta", { type: "datetime-local" })}
             {input("selection", "Seleção (aposta)", {
               required: true,
               placeholder: "Cruzeiro vence, Over 2.5…",
