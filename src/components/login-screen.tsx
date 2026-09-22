@@ -150,15 +150,7 @@ export function LoginScreen({ showWelcome = false }: { showWelcome?: boolean }) 
                 />
 
                 <section className="rise-scale rounded-[20px] border border-white/10 bg-[rgba(10,12,11,0.70)] p-6 shadow-[0_24px_80px_-40px_rgba(0,0,0,0.9)] backdrop-blur-xl sm:p-7">
-                  <p className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-3 py-1.5 text-[10.5px] font-medium tracking-[0.12em] text-white/55 uppercase">
-                    <span
-                      aria-hidden="true"
-                      className="size-1.5 rounded-full bg-primary shadow-[0_0_10px_2px_rgba(34,197,94,0.55)]"
-                    />
-                    Acesso à plataforma
-                  </p>
-
-                  <h1 className="mt-5 text-[26px] leading-tight font-semibold tracking-tight text-white sm:text-[30px]">
+                  <h1 className="text-[26px] leading-tight font-semibold tracking-tight text-white sm:text-[30px]">
                     Entrar na sua conta
                   </h1>
                   <p className="mt-2 text-[13.5px] leading-relaxed text-white/55">
