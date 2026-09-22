@@ -2,7 +2,7 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
-@custom-variant dark (&:is(.dark *, .black *));
+@custom-variant dark (&:is(.dark *));
 
 @theme inline {
   --color-background: var(--background);
@@ -56,39 +56,48 @@
 
 :root {
   color-scheme: light;
-  --background: #f4f7f4;
-  --foreground: #16231b;
+
+  --background: #f6f8f6;
+  --foreground: #0b0d0c;
+
   --card: #ffffff;
   --card-foreground: var(--foreground);
   --popover: #ffffff;
   --popover-foreground: var(--foreground);
+
   --primary: #15803d;
   --primary-foreground: #ffffff;
-  --secondary: #e7efe9;
-  --secondary-foreground: #27412f;
-  --muted: #ebf1ec;
-  --muted-foreground: #55675c;
-  --accent: #e2f4e8;
+  --secondary: rgba(11, 13, 12, 0.05);
+  --secondary-foreground: #16231b;
+  --muted: rgba(11, 13, 12, 0.04);
+  --muted-foreground: rgba(11, 13, 12, 0.62);
+  --accent: rgba(21, 128, 61, 0.10);
   --accent-foreground: #14532d;
-  --profit: #087749;
-  --loss: #be2347;
+
+  --brand: #15803d;
+  --brand-bright: #16a34a;
+
+  --profit: #14722f;
+  --loss: #c02626;
   --warning: #946000;
   --ai: #08664f;
   --ai-surface: #ecfdf5;
   --ai-border: #4c9b80;
   --destructive: var(--loss);
-  --border: #d7e2da;
-  --input: #a7b8ac;
+
+  --border: rgba(11, 13, 12, 0.12);
+  --input: rgba(11, 13, 12, 0.22);
   --field: #ffffff;
   --ring: #16a34a;
+
   --chart-1: var(--profit);
   --chart-2: var(--loss);
   --chart-3: var(--primary);
   --chart-4: var(--warning);
   --chart-5: var(--muted-foreground);
-  --brand: #15803d;
-  --brand-bright: #16a34a;
+
   --radius: 0.5rem;
+
   --sidebar: #ffffff;
   --sidebar-foreground: var(--foreground);
   --sidebar-primary: var(--primary);
@@ -99,68 +108,48 @@
   --sidebar-ring: var(--ring);
 }
 
+/* Mesma linguagem da splash e do login: fundo #0B0D0C, superficies em branco
+   translucido e borda branca a 10%. Popover e sidebar ficam opacos porque
+   cobrem conteudo. */
 .dark {
   color-scheme: dark;
-  --background: #0b0d0c;
-  --foreground: #e8efea;
-  --card: #121614;
-  --popover: #171b18;
-  --primary: #22c55e;
-  --primary-foreground: #04150b;
-  --secondary: #1e2620;
-  --secondary-foreground: #dce7df;
-  --muted: #182019;
-  --muted-foreground: #a7b5ab;
-  --accent: #17301f;
-  --accent-foreground: #7be7a6;
-  --profit: #53dba3;
-  --loss: #ff8da3;
-  --warning: #f4c36a;
-  --ai: #92e7c7;
-  --ai-surface: #14372f;
-  --ai-border: #40856f;
-  --border: #263129;
-  --input: #5a6d60;
-  --field: #070908;
-  --ring: #22c55e;
-  --sidebar: #0f1210;
-  --brand: #22c55e;
-  --brand-bright: #4ade80;
-}
 
-/* Preto neutro: as superfícies do visual anterior ao design system, com as
-   cores semânticas atuais para que lucro, perda e leitura por IA sigam legíveis. */
-.black {
-  color-scheme: dark;
   --background: #0b0d0c;
   --foreground: #ffffff;
-  --card: #111413;
+
+  --card: rgba(255, 255, 255, 0.03);
   --card-foreground: var(--foreground);
-  --popover: #141817;
+  --popover: #101413;
   --popover-foreground: var(--foreground);
+
   --primary: #22c55e;
   --primary-foreground: #04150b;
-  --secondary: #191d1b;
+  --secondary: rgba(255, 255, 255, 0.05);
   --secondary-foreground: #ffffff;
-  --muted: #191d1b;
+  --muted: rgba(255, 255, 255, 0.05);
   --muted-foreground: rgba(255, 255, 255, 0.55);
-  --accent: #14261b;
+  --accent: rgba(34, 197, 94, 0.12);
   --accent-foreground: #4ade80;
-  --profit: #53dba3;
-  --loss: #ff8da3;
+
+  --brand: #22c55e;
+  --brand-bright: #4ade80;
+
+  --profit: #4ade80;
+  --loss: #f87171;
   --warning: #f4c36a;
   --ai: #92e7c7;
   --ai-surface: #14372f;
   --ai-border: #40856f;
   --destructive: var(--loss);
+
   --border: rgba(255, 255, 255, 0.10);
-  --input: rgba(255, 255, 255, 0.15);
-  --field: #070908;
+  --input: rgba(255, 255, 255, 0.16);
+  --field: rgba(255, 255, 255, 0.03);
   --ring: #22c55e;
-  --sidebar: #111413;
-  --brand: #22c55e;
-  --brand-bright: #4ade80;
+
+  --sidebar: #090b0a;
 }
+
 
 @layer base {
   * { @apply border-border outline-ring/50; }
