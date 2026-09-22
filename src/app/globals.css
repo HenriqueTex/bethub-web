@@ -198,3 +198,19 @@
 
 /* Imported fields must retain their provenance tint over control variants. */
 .ai-field { border-color: var(--ai-border); background: var(--ai-surface); }
+
+/* Safari/iOS dimensiona campos de data pelo conteúdo e ignora width:100%,
+   fazendo-os estourar a coluna. Chromium não reproduz. */
+input[type="date"],
+input[type="datetime-local"],
+input[type="time"] {
+  min-width: 0;
+  max-width: 100%;
+}
+
+input[type="date"]::-webkit-date-and-time-value,
+input[type="datetime-local"]::-webkit-date-and-time-value,
+input[type="time"]::-webkit-date-and-time-value {
+  min-width: 0;
+  text-align: left;
+}

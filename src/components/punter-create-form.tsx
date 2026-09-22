@@ -41,7 +41,12 @@ interface Props {
 }
 
 const selectClass =
-  "h-11 w-full min-w-0 rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+  "h-11 w-full min-w-0 rounded-lg border border-input bg-field px-2.5 py-1 text-base transition-colors outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 md:text-sm"
+
+const amountShortcuts = {
+  units: ["0.25", "0.5", "1", "2"],
+  money: ["25", "50", "100", "200"]
+} as const
 
 function localDate(value: string) {
   const date = new Date(value)
@@ -229,8 +234,8 @@ export function PunterCreateForm({
     } = {}
   ) {
     return (
-      <div className="grid min-w-0 gap-2">
-        <Label htmlFor={"create-bet-" + key}>
+      <div className="grid min-w-0 content-start gap-2">
+        <Label className="min-h-7" htmlFor={"create-bet-" + key}>
           {label}
           {draft.imported[key] && (
             <span className="ai-badge">
@@ -364,8 +369,8 @@ export function PunterCreateForm({
             </ul>
           )}
           <div className="grid gap-4 sm:grid-cols-2">
-            <div className="grid gap-2">
-              <Label htmlFor="create-bet-account">
+            <div className="grid min-w-0 content-start gap-2">
+              <Label className="min-h-7" htmlFor="create-bet-account">
                 Conta{" "}
                 {draft.imported.bookmakerAccountId && (
                   <span className="ai-badge">
@@ -392,8 +397,8 @@ export function PunterCreateForm({
                 ))}
               </select>
             </div>
-            <div className="grid gap-2">
-              <Label htmlFor="create-bet-tipster">Tipster</Label>
+            <div className="grid min-w-0 content-start gap-2">
+              <Label className="min-h-7" htmlFor="create-bet-tipster">Tipster</Label>
               <select
                 id="create-bet-tipster"
                 className={selectClass}
@@ -413,8 +418,8 @@ export function PunterCreateForm({
             </div>
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
-            <div className="grid min-w-0 gap-2">
-              <Label htmlFor="create-bet-event">
+            <div className="grid min-w-0 content-start gap-2">
+              <Label className="min-h-7" htmlFor="create-bet-event">
                 Evento
                 {draft.imported.event && (
                   <span className="text-[11px] font-normal text-emerald-600 dark:text-emerald-400">
@@ -452,8 +457,8 @@ export function PunterCreateForm({
               min: "1.01",
               placeholder: "1,85"
             })}
-            <div className="grid gap-2">
-              <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="grid min-w-0 content-start gap-2">
+              <div className="flex min-h-7 flex-wrap items-center justify-between gap-2">
                 <Label htmlFor="create-bet-amount">
                   {fields.amountMode === "money"
                     ? "Valor apostado (R$)"
@@ -488,18 +493,38 @@ export function PunterCreateForm({
                   ))}
                 </div>
               </div>
-              <DecimalInput
-                id="create-bet-amount"
-                min="0.01"
-                step={fields.amountMode === "money" ? "0.01" : "any"}
-                required
-                className={cn(
-                  "h-11",
-                  draft.imported.amount && "ai-field"
-                )}
-                value={fields.amount}
-                onChange={(event) => edit("amount", event.target.value)}
-              />
+              <div className="flex min-w-0 items-center gap-2">
+                <DecimalInput
+                  id="create-bet-amount"
+                  min="0.01"
+                  step={fields.amountMode === "money" ? "0.01" : "any"}
+                  required
+                  className={cn(
+                    "h-11 w-1/2",
+                    draft.imported.amount && "ai-field"
+                  )}
+                  value={fields.amount}
+                  onChange={(event) => edit("amount", event.target.value)}
+                />
+                <div className="flex min-w-0 flex-1 gap-1">
+                  {amountShortcuts[fields.amountMode].map((value) => (
+                    <button
+                      type="button"
+                      key={value}
+                      aria-pressed={fields.amount === value}
+                      onClick={() => edit("amount", value)}
+                      className={cn(
+                        "h-11 min-w-0 flex-1 rounded-lg border border-input px-1 text-xs tabular-nums transition-colors",
+                        fields.amount === value
+                          ? "border-ring bg-secondary font-medium"
+                          : "bg-field text-muted-foreground hover:text-foreground"
+                      )}
+                    >
+                      {value.replace(".", ",")}
+                    </button>
+                  ))}
+                </div>
+              </div>
               <p className="text-xs text-muted-foreground">
                 {formatBRL(stake)} ·{" "}
                 {new Intl.NumberFormat("pt-BR", {
