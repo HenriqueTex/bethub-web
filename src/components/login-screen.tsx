@@ -3,17 +3,11 @@
 import { FormEvent, MouseEvent, useEffect, useRef, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import { Eye, EyeOff, ShieldCheck } from "lucide-react"
 import { ThemeSwitcher } from "@/components/theme-switcher"
 import { WelcomeOverlay } from "@/components/welcome-overlay"
+import { BrandMark } from "@/components/landing/brand-mark"
 import { Button } from "@/components/ui/button"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { rippleSweep } from "@/components/ui/kinetic-grid"
@@ -36,6 +30,7 @@ export function LoginScreen({ showWelcome = false }: { showWelcome?: boolean }) 
   const router = useRouter()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [phase, setPhase] = useState<Phase>(showWelcome ? "welcome" : "done")
@@ -119,64 +114,129 @@ export function LoginScreen({ showWelcome = false }: { showWelcome?: boolean }) 
         }
         inert={phase !== "done"}
       >
-        <main className="flex min-h-dvh items-center justify-center bg-background p-4 py-20">
-          <div className="absolute right-4 top-4">
+        <main className="relative flex min-h-dvh items-center justify-center bg-background p-4 py-20">
+          <div className="absolute top-4 right-4">
             <ThemeSwitcher compact />
           </div>
-          <Card className="w-full max-w-sm border-t-2 border-t-primary">
-            <CardHeader>
-              <CardTitle>Entrar no BetHub</CardTitle>
-              <CardDescription>Acesse sua conta com e-mail e senha</CardDescription>
-            </CardHeader>
-            <form onSubmit={handleSubmit}>
-              <CardContent className="grid gap-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="email">E-mail</Label>
+
+          <div className="relative w-full max-w-[420px]">
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute -inset-16 -z-10 rounded-full bg-primary/10 blur-[120px]"
+            />
+
+            <section className="rise-scale rounded-2xl border border-border bg-card p-6 shadow-[0_24px_80px_-40px_rgba(0,0,0,0.45)] sm:p-7">
+              <BrandMark className="[&>span:last-child]:text-foreground" />
+
+              <p className="mt-6 inline-flex items-center gap-2 rounded-full border border-border bg-muted px-3 py-1.5 text-[10.5px] font-medium tracking-[0.12em] text-muted-foreground uppercase">
+                <span
+                  aria-hidden="true"
+                  className="size-1.5 rounded-full bg-primary shadow-[0_0_10px_2px_color-mix(in_oklab,var(--primary)_55%,transparent)]"
+                />
+                Acesso à plataforma
+              </p>
+
+              <h1 className="mt-4 text-[26px] leading-tight font-semibold tracking-tight sm:text-[30px]">
+                Entrar na sua conta
+              </h1>
+              <p className="mt-2 text-[13.5px] leading-relaxed text-muted-foreground">
+                Continue de onde parou: banca, histórico de apostas e indicadores de
+                desempenho.
+              </p>
+
+              <form onSubmit={handleSubmit} className="mt-7 space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="email" className="text-[13px]">
+                    E-mail
+                  </Label>
                   <Input
                     id="email"
                     type="email"
+                    autoComplete="email"
                     placeholder="voce@exemplo.com"
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
+                    aria-invalid={Boolean(error)}
+                    className="h-11 rounded-xl px-3.5"
                   />
                 </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="password">Senha</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                  />
+
+                <div className="space-y-2">
+                  <Label htmlFor="password" className="text-[13px]">
+                    Senha
+                  </Label>
+                  <div className="relative">
+                    <Input
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      autoComplete="current-password"
+                      placeholder="••••••••"
+                      required
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      aria-invalid={Boolean(error)}
+                      className="h-11 rounded-xl px-3.5 pr-11"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword((value) => !value)}
+                      aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
+                      aria-pressed={showPassword}
+                      className="absolute inset-y-0 right-0 flex w-11 items-center justify-center rounded-r-xl text-muted-foreground transition-colors hover:text-foreground"
+                    >
+                      {showPassword ? (
+                        <EyeOff className="size-4" aria-hidden="true" />
+                      ) : (
+                        <Eye className="size-4" aria-hidden="true" />
+                      )}
+                    </button>
+                  </div>
                 </div>
-                {error && <p className="text-sm text-destructive">{error}</p>}
-              </CardContent>
-              <CardFooter className="mt-6 flex-col gap-3">
-                <Button type="submit" className="w-full" disabled={loading}>
+
+                {error && (
+                  <p role="alert" className="text-sm text-destructive">
+                    {error}
+                  </p>
+                )}
+
+                <Button
+                  type="submit"
+                  className="h-11 w-full rounded-xl text-sm font-medium"
+                  disabled={loading}
+                >
                   {loading ? "Entrando..." : "Entrar"}
                 </Button>
+
                 {isDev && (
                   <Button
                     type="button"
                     variant="outline"
-                    className="w-full border-dashed"
+                    className="h-11 w-full rounded-xl border-dashed text-sm font-normal"
                     disabled={loading}
                     onClick={handleDevLogin}
                   >
                     Entrar como dev
                   </Button>
                 )}
-                <p className="text-sm text-muted-foreground">
-                  Não tem conta?{" "}
-                  <Link href="/register" className="text-foreground underline underline-offset-4">
-                    Cadastre-se
-                  </Link>
-                </p>
-              </CardFooter>
-            </form>
-          </Card>
+              </form>
+
+              <p className="mt-6 border-t border-border pt-5 text-center text-[13px] text-muted-foreground">
+                Não tem conta?{" "}
+                <Link
+                  href="/register"
+                  className="font-medium text-primary underline-offset-4 hover:underline"
+                >
+                  Cadastre-se
+                </Link>
+              </p>
+            </section>
+
+            <p className="mt-5 flex items-center justify-center gap-2 text-[11.5px] text-muted-foreground">
+              <ShieldCheck className="size-3.5" aria-hidden="true" />
+              Seus dados de banca permanecem privados.
+            </p>
+          </div>
         </main>
       </div>
     </>
