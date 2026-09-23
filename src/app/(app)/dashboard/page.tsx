@@ -38,6 +38,8 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { KpiCard } from "@/components/kpi-card"
+import { PageHeader } from "@/components/page-header"
 import { formatBRL, formatSigned, formatOdd, formatPercent, formatSignedUnits } from "@/lib/format"
 import { cn } from "@/lib/utils"
 import { resources, StatsRow, StatsSummary, TimelinePoint } from "@/lib/resources"
@@ -75,6 +77,12 @@ function withOrigin(points: TimelinePoint[]): TimelinePoint[] {
   const previous = new Date(`${points[0].day}T12:00:00`)
   previous.setDate(previous.getDate() - 1)
   return [{ day: previous.toISOString().slice(0, 10), profit: 0, cumulativeProfit: 0 }, ...points]
+}
+
+const AXIS_TICK = {
+  fill: "var(--muted-foreground)",
+  fontFamily: "var(--font-roboto-mono), monospace",
+  fontSize: 11,
 }
 
 const chartConfig = {
@@ -131,98 +139,107 @@ export default function DashboardPage() {
       .catch(() => toast.error("Erro ao carregar ranking"))
   }, [dimension, filters])
 
+  const lastProfit = timeline.at(-1)?.cumulativeProfit ?? 0
+  const lastColor = lastProfit >= 0 ? "var(--profit)" : "var(--loss)"
   const temCusto = (summary?.costs ?? 0) > 0
-  const profitPositive = (summary?.netProfit ?? summary?.profit ?? 0) >= 0
+  const netProfit = summary?.netProfit ?? summary?.profit ?? 0
+  const profitTone = netProfit > 0 ? "profit" : netProfit < 0 ? "loss" : "default"
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
-      <div className="page-heading">
-        <div><h1 className="text-2xl font-bold">Dashboard</h1><p className="mt-1 text-sm text-muted-foreground">Seu desempenho, além de cada aposta.</p></div>
-        <Select value={period} onValueChange={(value) => setPeriod(String(value))}>
-          <SelectTrigger aria-label="Período do dashboard" className="w-full sm:w-44">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {PERIODS.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
-                {option.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+      <PageHeader
+        title="Dashboard"
+        description="Seu desempenho, além de cada aposta."
+        actions={
+          <Select value={period} onValueChange={(value) => setPeriod(String(value))}>
+            <SelectTrigger aria-label="Período do dashboard" className="w-full sm:w-44">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {PERIODS.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        }
+      />
 
-      <div className="grid grid-cols-1 gap-2 min-[360px]:grid-cols-2 sm:gap-4 xl:grid-cols-4 [&_[data-slot=card-header]]:px-3 [&_[data-slot=card-content]]:px-3 sm:[&_[data-slot=card-header]]:px-6 sm:[&_[data-slot=card-content]]:px-6 [&_[data-slot=card-title]]:text-xl sm:[&_[data-slot=card-title]]:text-2xl">
-        <Card>
-          <CardHeader className="pb-1">
-            <CardDescription>Lucro no período</CardDescription>
-            <CardTitle
-              className={cn("text-2xl", profitPositive ? "text-profit" : "text-loss")}
-            >
-              {formatSigned(summary?.netProfit ?? summary?.profit)}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="text-xs text-muted-foreground">
-            {temCusto ? (
+      <div className="grid grid-cols-1 gap-2 min-[360px]:grid-cols-2 sm:gap-4 xl:grid-cols-4">
+        <KpiCard
+          label="Lucro no período"
+          tone={profitTone}
+          value={formatSigned(summary?.netProfit ?? summary?.profit)}
+          detail={
+            temCusto ? (
               <>
                 {formatSigned(summary?.profit)} em apostas · custos{" "}
                 <span className="text-loss">-{formatBRL(summary?.costs)}</span>
               </>
             ) : (
               <>
-                {summary ? formatSignedUnits(summary.profitUnits) : "—"} ·
-                odd média {summary ? formatOdd(summary.avgOdd) : "—"}
+                {summary ? formatSignedUnits(summary.profitUnits) : "—"} · odd média{" "}
+                {summary ? formatOdd(summary.avgOdd) : "—"}
               </>
-            )}
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-1">
-            <CardDescription>ROI / Taxa de acerto</CardDescription>
-            <CardTitle className="text-2xl">
+            )
+          }
+        />
+        <KpiCard
+          label="ROI / Taxa de acerto"
+          value={
+            <>
               <span className="whitespace-nowrap">
                 {summary ? formatPercent(summary.netRoi ?? summary.roi) : "—"}
               </span>
-              <span className="mx-2 text-muted-foreground">·</span>
               <span className="whitespace-nowrap">
+                <span className="mx-1.5 text-muted-foreground">·</span>
                 {summary ? formatPercent(summary.hitRate) : "—"}
               </span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="text-xs text-muted-foreground">
-            sobre {formatBRL(summary?.staked)} apostados
-            {temCusto && ` · ${formatPercent(summary?.roi)} sem custos`}
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-1">
-            <CardDescription>Saldo nas casas</CardDescription>
-            <CardTitle className="text-2xl">{formatBRL(summary?.totalBalance)}</CardTitle>
-          </CardHeader>
-          <CardContent className="text-xs text-muted-foreground">
-            depósitos − saques + lucro liquidado
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-1">
-            <CardDescription>Apostas</CardDescription>
-            <CardTitle className="text-2xl">
+            </>
+          }
+          detail={
+            <>
+              sobre {formatBRL(summary?.staked)} apostados
+              {temCusto && ` · ${formatPercent(summary?.roi)} sem custos`}
+            </>
+          }
+        />
+        <KpiCard
+          label="Saldo nas casas"
+          value={formatBRL(summary?.totalBalance)}
+          detail="depósitos − saques + lucro liquidado"
+        />
+        <KpiCard
+          label="Apostas"
+          value={
+            <>
               {summary?.totalBets ?? "—"}
-              <span className="ml-2 text-base font-normal text-muted-foreground">
+              <span className="ml-1.5 text-sm font-normal text-muted-foreground">
                 ({summary?.pendingBets ?? 0} abertas)
               </span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="text-xs text-muted-foreground">
-            {formatBRL(summary?.pendingStake)} em jogo
-          </CardContent>
-        </Card>
+            </>
+          }
+          detail={`${formatBRL(summary?.pendingStake)} em jogo`}
+        />
       </div>
 
       <Card>
-        <CardHeader>
-          <CardTitle>Lucro acumulado</CardTitle>
-          <CardDescription>Evolução do lucro liquidado no período</CardDescription>
+        <CardHeader className="flex-row flex-wrap items-start justify-between gap-x-4 gap-y-1">
+          <div className="min-w-0 space-y-1.5">
+            <CardTitle>Lucro acumulado</CardTitle>
+            <CardDescription>Evolução do lucro liquidado no período</CardDescription>
+          </div>
+          {timeline.length > 0 && (
+            <p
+              className={cn(
+                "numeric text-xs font-medium whitespace-nowrap",
+                lastProfit >= 0 ? "text-profit" : "text-loss"
+              )}
+            >
+              {formatBRL(timeline[0].cumulativeProfit)} → {formatBRL(lastProfit)}
+            </p>
+          )}
         </CardHeader>
         <CardContent>
           {timeline.length === 0 ? (
@@ -230,6 +247,7 @@ export default function DashboardPage() {
               Sem apostas liquidadas no período
             </p>
           ) : (
+            <div className="rounded-xl border border-glass-border bg-foreground/[0.02] p-2 sm:p-3">
             <ChartContainer config={chartConfig} className="h-64 w-full">
               <AreaChart data={timeline} margin={{ left: 8, right: 8, top: 8 }}>
                 <defs>
@@ -248,7 +266,7 @@ export default function DashboardPage() {
                 <CartesianGrid vertical={false} strokeOpacity={0.35} />
                 <XAxis
                   dataKey="day"
-                  tick={{ fill: "var(--muted-foreground)" }}
+                  tick={AXIS_TICK}
                   tickLine={false}
                   axisLine={false}
                   tickMargin={8}
@@ -260,7 +278,7 @@ export default function DashboardPage() {
                   }
                 />
                 <YAxis
-                  tick={{ fill: "var(--muted-foreground)" }}
+                  tick={AXIS_TICK}
                   tickLine={false}
                   axisLine={false}
                   width={70}
@@ -284,11 +302,21 @@ export default function DashboardPage() {
                   strokeWidth={2}
                   fill="url(#fillProfit)"
                   isAnimationActive={false}
-                  dot={false}
+                  dot={(props: { cx?: number; cy?: number; index?: number }) =>
+                    props.index === timeline.length - 1 && props.cx != null && props.cy != null ? (
+                      <g key="last">
+                        <circle cx={props.cx} cy={props.cy} r={7} fill={lastColor} opacity={0.18} />
+                        <circle cx={props.cx} cy={props.cy} r={3} fill={lastColor} />
+                      </g>
+                    ) : (
+                      <g key={props.index} />
+                    )
+                  }
                   activeDot={{ r: 4 }}
                 />
               </AreaChart>
             </ChartContainer>
+            </div>
           )}
         </CardContent>
       </Card>

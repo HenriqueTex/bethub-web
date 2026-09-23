@@ -13,7 +13,7 @@ O welcome e o login definem a linguagem, e o restante do app a estende:
 
 `src/app/globals.css` é a fonte de verdade. Código novo não usa hexadecimal, `rgba()` nem `white/…` nos componentes: tudo vem dos tokens abaixo, inclusive gráficos, canvas, estados, menus e toasts.
 
-O alinhamento das telas a esta linguagem acontece em fases, conforme `docs/PLAN-alinhamento-visual.md`. As Fases 0 (tokens, grade e este documento) e 1 (componentes base, shell e telas públicas) estão aplicadas. As telas internas (Fases 2 e 3) ainda usam parte da composição antiga.
+O alinhamento das telas a esta linguagem acontece em fases, conforme `docs/PLAN-alinhamento-visual.md`. As Fases 0 (tokens, grade e este documento), 1 (componentes base, shell e telas públicas) e 2 (Punter, Surebet, Dashboard e Todas as apostas) estão aplicadas. As telas auxiliares (Fase 3) ainda usam parte da composição antiga.
 
 ## Tokens
 
@@ -84,6 +84,11 @@ Texto verde sobre fundo claro usa `primary`, porque `brand-bright` não chega a 
 - **ResultBadge:** pílula com ponto colorido e texto. Resultados "half" têm contorno sem preenchimento; Void e Cashout são neutros. Nunca depende só da cor.
 - **BrandMark:** ícone em quadrado de 10px de raio e "BetHub". Aparece no shell do app; as telas de autenticação não o exibem. `compact` esconde a palavra visualmente, mas mantém o texto para leitores de tela.
 - **Shell:** sidebar e cabeçalho mobile em `panel-glass` sobre a grade. O cabeçalho mobile respeita `safe-area-inset-top`. O item ativo é uma pílula `primary/10` com anel `primary/25` e ícone verde. A tela de carregamento mostra a grade e o BrandMark.
+- **PageHeader:** título de 26–28px semibold com tracking apertado, descrição opcional de 13,5px e área de ações à direita (quebra de linha no mobile). Sem eyebrow.
+- **KpiCard:** painel opaco com microrrótulo, valor em Roboto Mono (18px no mobile, 20px a partir de 640px) e linha de detalhe. `tone="profit" | "loss"` colore o valor e mostra o ícone de tendência; zero é neutro.
+- **Formulários principais** ("Nova aposta" e calculadora de surebet): `panel-glass` com halo verde atrás, entrada `rise-panel` (300ms) e botão de registrar em `size="lg"`. No Punter, `.form-main` dá `rounded-control` a inputs e selects de 44px. Conta e tipster usam o Select do sistema, com `<input type="hidden">` levando o valor ao FormData; a conta é validada no envio, com mensagem e foco no campo.
+- **Lista de apostas:** tabela a partir de 768px. Abaixo disso, lista no formato "Últimas apostas" do preview: ponto de resultado, seleção, evento, data · casa · stake, odd em chip, lucro, badge e as mesmas ações.
+- **Gráfico de lucro acumulado:** moldura interna de vidro, eixos em Roboto Mono de 11px, ponto final destacado e resumo "início → atual" no cabeçalho.
 - **AuthShell:** layout compartilhado entre login e cadastro (KineticGrid, cabeçalho só com o seletor de tema, painel de vidro de 420px, halo). Welcome, login e cadastro seguem o tema escolhido.
 
 ## Tipografia e números
@@ -93,13 +98,13 @@ Texto verde sobre fundo claro usa `primary`, porque `brand-bright` não chega a 
 
   | Elemento | Tamanho | Peso / estilo |
   | --- | --- | --- |
-  | Título de página | 24px | 700 |
+  | Título de página | 26–28px | semibold, tracking apertado |
   | Título das telas públicas | 26–30px | semibold, tracking apertado |
   | Título interno | 16–20px | 600 |
   | Texto de interface | 14px | — |
   | Texto de apoio | 12–13,5px | — |
   | Microrrótulo | 11px | maiúsculas |
-  | KPI | 20px no mobile, 24px a partir de 640px | números tabulares, quebra só entre valores |
+  | KPI | 18px no mobile, 20px a partir de 640px | Roboto Mono, quebra só entre valores |
 
 - **Formato:** moeda em BRL; lucro positivo com `+`; percentuais com duas casas e vírgula; odds com até três casas.
 - **Unidades assinadas do resumo:** duas casas, como `+15.02u`, conforme o briefing.
@@ -111,8 +116,8 @@ Texto verde sobre fundo claro usa `primary`, porque `brand-bright` não chega a 
 - **Nas telas públicas:** `rise` e `rise-scale` com `cubic-bezier(0.22,1,0.36,1)` na entrada, e a revelação por máscara radial do welcome para o login. A máscara acompanha a onda do KineticGrid a 800 px/s (cerca de 2s em 1440×900).
 - **Overlays:** entrada em 150–200ms com leve escala, saída em 100–150ms.
 - **Hover e pressão:** 100–150ms.
-- **No app:** nenhuma entrada em cada tela.
-- **`prefers-reduced-motion`:** zera as durações. O KineticGrid desenha um único quadro estático.
+- **No app:** um único momento por tela, a entrada do formulário principal (`rise-panel`, 300ms). O resto aparece sem animação.
+- **`prefers-reduced-motion`:** transições instantâneas, e as entradas (`rise*` e overlays) viram só um fade de 200ms, sem deslocamento nem escala. O KineticGrid desenha um único quadro estático.
 
 ## Responsividade e acessibilidade
 

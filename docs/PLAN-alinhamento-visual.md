@@ -10,7 +10,7 @@ Trata-se de **extensão de um mundo visual existente**, não de redesign. O welc
 
 - [x] Fase 0: tokens, grade estática, DESIGN.md
 - [x] Fase 1: componentes base, shell, KineticGrid com tema (com fallback), welcome/login com tema, cadastro no `AuthShell`
-- [ ] Fase 2: telas principais
+- [x] Fase 2: telas principais (PageHeader, KpiCard, formulários em vidro, Select no Punter, gráfico, lista mobile, movimento)
 - [ ] Fase 3: telas auxiliares e fechamento
 
 ## Decisões tomadas

@@ -233,6 +233,7 @@
       linear-gradient(to bottom, rgb(var(--grid-rgb) / var(--app-grid-line-alpha)) 1px, transparent 1px);
     background-size: 100% 100%, 32px 32px, 32px 32px, 32px 32px;
   }
+  .form-main :is([data-slot="input"], [data-slot="select-trigger"]) { border-radius: var(--radius-control); }
   [data-slot="popover-content"] { max-width: calc(100vw - 2rem); max-height: 80dvh; overflow-y: auto; }
 }
 
@@ -243,8 +244,20 @@
   input:not([type="checkbox"]):not([type="range"]), select, textarea { font-size: 16px; }
 }
 
+/* Movimento reduzido: sem deslocamento nem escala, mas as mudanças de estado continuam
+   visíveis por um fade curto em vez de sumirem. */
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+  *, *::before, *::after {
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+    --tw-enter-scale: 1;
+    --tw-enter-translate-x: 0;
+    --tw-enter-translate-y: 0;
+    --tw-exit-scale: 1;
+    --tw-exit-translate-x: 0;
+    --tw-exit-translate-y: 0;
+  }
+  .rise, .rise-scale, .rise-panel { animation: fade-only 200ms ease-out both !important; }
 }
 
 /* Imported fields must retain their provenance tint over control variants. */
@@ -269,8 +282,7 @@
   }
 }
 
-/* Entradas da splash: sobem e assentam. O bloco global de prefers-reduced-motion
-   acima já zera a duração destas animações. */
+/* Entradas: sobem e assentam. Com movimento reduzido viram só um fade (bloco acima). */
 @keyframes rise {
   from { opacity: 0; transform: translateY(18px); }
   to { opacity: 1; transform: none; }
@@ -281,6 +293,11 @@
   to { opacity: 1; transform: none; }
 }
 
+@keyframes fade-only {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
 @keyframes draw-line {
   from { stroke-dashoffset: var(--line-length); }
   to { stroke-dashoffset: 0; }
@@ -289,6 +306,7 @@
 @layer utilities {
   .rise { animation: rise 0.8s cubic-bezier(0.22, 1, 0.36, 1) both; }
   .rise-scale { animation: rise-scale 0.9s cubic-bezier(0.22, 1, 0.36, 1) both; }
+  .rise-panel { animation: rise-scale 0.3s cubic-bezier(0.22, 1, 0.36, 1) both; }
   .draw-line {
     stroke-dasharray: var(--line-length);
     animation: draw-line 1.6s cubic-bezier(0.22, 1, 0.36, 1) 0.5s both;
