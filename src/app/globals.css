@@ -159,7 +159,9 @@
   button, input, select, textarea { font: inherit; }
   button:not(:disabled), summary { cursor: pointer; }
   :focus-visible { outline: 2px solid var(--ring); outline-offset: 3px; }
-  input, select, textarea { scroll-margin-block: 5rem; }
+  input, select, textarea { scroll-margin-block: 5rem; caret-color: var(--primary); }
+  ::selection { background: color-mix(in oklab, var(--primary) 30%, transparent); color: var(--foreground); }
+  html { scrollbar-color: color-mix(in oklab, var(--foreground) 22%, transparent) transparent; }
 }
 
 @layer components {

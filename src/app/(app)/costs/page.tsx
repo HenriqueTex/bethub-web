@@ -149,7 +149,7 @@ export default function CostsPage() {
     .sort((a, b) => b.value - a.value)
 
   return (
-    <div className="mx-auto max-w-5xl space-y-6">
+    <div className="mx-auto max-w-6xl space-y-6">
       <div className="page-heading">
         <h1 className="text-2xl font-bold">Custos</h1>
         <Button onClick={() => openDialog("new")}>
@@ -247,6 +247,8 @@ export default function CostsPage() {
                         <Button
                           variant="ghost"
                           size="icon-sm"
+                          title="Editar custo"
+                          aria-label="Editar custo"
                           onClick={() => openDialog(cost)}
                         >
                           <Pencil className="size-4" />
@@ -254,6 +256,8 @@ export default function CostsPage() {
                         <Button
                           variant="ghost"
                           size="icon-sm"
+                          title="Excluir custo"
+                          aria-label="Excluir custo"
                           onClick={() => remove(cost)}
                         >
                           <Trash2 className="size-4 text-loss" />

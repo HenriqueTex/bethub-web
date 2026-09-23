@@ -199,7 +199,7 @@ export default function BookmakersPage() {
   }
 
   return (
-    <div className="mx-auto max-w-5xl space-y-6">
+    <div className="mx-auto max-w-6xl space-y-6">
       <div className="page-heading">
         <h1 className="text-2xl font-bold">Casas & Contas</h1>
         <Button onClick={() => setBookmakerDialog(true)}>
@@ -276,6 +276,8 @@ export default function BookmakersPage() {
                 <Button
                   variant="ghost"
                   size="icon-sm"
+                  title={`Excluir ${bookmaker.name}`}
+                  aria-label={`Excluir ${bookmaker.name}`}
                   onClick={() => handleDeleteBookmaker(bookmaker)}
                 >
                   <Trash2 className="size-4 text-loss" />
@@ -347,6 +349,8 @@ export default function BookmakersPage() {
                             <Button
                               variant="ghost"
                               size="icon-sm"
+                              title="Excluir conta"
+                              aria-label="Excluir conta"
                               onClick={() => handleDeleteAccount(account)}
                             >
                               <Trash2 className="size-4 text-loss" />
@@ -472,6 +476,8 @@ export default function BookmakersPage() {
                         <Button
                           variant="ghost"
                           size="icon-xs"
+                          title="Excluir movimentação"
+                          aria-label="Excluir movimentação"
                           onClick={async () => {
                             await resources.transactions.remove(transaction.id)
                             await openTransactions(txAccount!)

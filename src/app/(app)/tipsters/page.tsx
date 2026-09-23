@@ -83,7 +83,7 @@ export default function TipstersPage() {
   }
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6">
+    <div className="mx-auto max-w-6xl space-y-6">
       <div className="page-heading">
         <h1 className="text-2xl font-bold">Tipsters</h1>
         <Dialog
@@ -168,6 +168,8 @@ export default function TipstersPage() {
                       <Button
                         variant="ghost"
                         size="icon-sm"
+                        title={`Editar ${tipster.name}`}
+                        aria-label={`Editar ${tipster.name}`}
                         onClick={() => {
                           setEditing(tipster)
                           setOpen(true)
@@ -178,6 +180,8 @@ export default function TipstersPage() {
                       <Button
                         variant="ghost"
                         size="icon-sm"
+                        title={`Excluir ${tipster.name}`}
+                        aria-label={`Excluir ${tipster.name}`}
                         onClick={() => handleDelete(tipster)}
                       >
                         <Trash2 className="size-4 text-loss" />

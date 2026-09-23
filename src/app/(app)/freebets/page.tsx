@@ -31,10 +31,10 @@ const TRIGGER_LABELS: Record<string, string> = {
   always: "Sempre",
 }
 
-const STATUS_LABELS: Record<FreebetStatus, string> = {
-  pending: "Pendentes",
-  extracted: "Extraídas",
-  discarded: "Descartadas",
+const EMPTY_LABELS: Record<FreebetStatus, string> = {
+  pending: "pendente",
+  extracted: "extraída",
+  discarded: "descartada",
 }
 
 export default function FreebetsPage() {
@@ -74,7 +74,7 @@ export default function FreebetsPage() {
   const total = freebets.reduce((sum, freebet) => sum + freebet.extractedValue, 0)
 
   return (
-    <div className="mx-auto max-w-5xl space-y-6">
+    <div className="mx-auto max-w-6xl space-y-6">
       <div className="flex items-center gap-3">
         <Gift className="size-6 text-warning" />
         <h1 className="text-2xl font-bold">Freebets</h1>
@@ -124,7 +124,7 @@ export default function FreebetsPage() {
                 ) : freebets.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={8} className="text-center text-muted-foreground">
-                      Nenhuma freebet {STATUS_LABELS[status].toLowerCase()}
+                      Nenhuma freebet {EMPTY_LABELS[status]}
                     </TableCell>
                   </TableRow>
                 ) : (

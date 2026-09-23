@@ -69,6 +69,14 @@ function periodFrom(period: string): string | undefined {
   return undefined
 }
 
+// Com um único dia liquidado a área não tem o que ligar; o acumulado parte de zero na véspera.
+function withOrigin(points: TimelinePoint[]): TimelinePoint[] {
+  if (points.length !== 1) return points
+  const previous = new Date(`${points[0].day}T12:00:00`)
+  previous.setDate(previous.getDate() - 1)
+  return [{ day: previous.toISOString().slice(0, 10), profit: 0, cumulativeProfit: 0 }, ...points]
+}
+
 const chartConfig = {
   cumulativeProfit: { label: "Lucro acumulado", color: "var(--profit)" },
 }
@@ -111,7 +119,7 @@ export default function DashboardPage() {
     Promise.all([resources.stats.summary(filters), resources.stats.timeline(filters)])
       .then(([summaryData, timelineData]) => {
         setSummary(summaryData)
-        setTimeline(timelineData)
+        setTimeline(withOrigin(timelineData))
       })
       .catch(() => toast.error("Erro ao carregar estatísticas"))
   }, [filters])
@@ -129,7 +137,7 @@ export default function DashboardPage() {
   return (
     <div className="mx-auto max-w-6xl space-y-6">
       <div className="page-heading">
-        <div><p className="mb-1 text-xs font-medium uppercase tracking-widest text-primary">Visão geral</p><h1 className="text-2xl font-bold">Dashboard</h1><p className="mt-1 text-sm text-muted-foreground">Seu desempenho, além de cada aposta.</p></div>
+        <div><h1 className="text-2xl font-bold">Dashboard</h1><p className="mt-1 text-sm text-muted-foreground">Seu desempenho, além de cada aposta.</p></div>
         <Select value={period} onValueChange={(value) => setPeriod(String(value))}>
           <SelectTrigger aria-label="Período do dashboard" className="w-full sm:w-44">
             <SelectValue />
@@ -144,7 +152,7 @@ export default function DashboardPage() {
         </Select>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid grid-cols-1 gap-2 min-[360px]:grid-cols-2 sm:gap-4 xl:grid-cols-4 [&_[data-slot=card-header]]:px-3 [&_[data-slot=card-content]]:px-3 sm:[&_[data-slot=card-header]]:px-6 sm:[&_[data-slot=card-content]]:px-6 [&_[data-slot=card-title]]:text-xl sm:[&_[data-slot=card-title]]:text-2xl">
         <Card>
           <CardHeader className="pb-1">
             <CardDescription>Lucro no período</CardDescription>
@@ -172,14 +180,18 @@ export default function DashboardPage() {
           <CardHeader className="pb-1">
             <CardDescription>ROI / Taxa de acerto</CardDescription>
             <CardTitle className="text-2xl">
-              {summary ? formatPercent(summary.netRoi ?? summary.roi) : "—"}
+              <span className="whitespace-nowrap">
+                {summary ? formatPercent(summary.netRoi ?? summary.roi) : "—"}
+              </span>
               <span className="mx-2 text-muted-foreground">·</span>
-              {summary ? formatPercent(summary.hitRate) : "—"}
+              <span className="whitespace-nowrap">
+                {summary ? formatPercent(summary.hitRate) : "—"}
+              </span>
             </CardTitle>
           </CardHeader>
           <CardContent className="text-xs text-muted-foreground">
             sobre {formatBRL(summary?.staked)} apostados
-            {temCusto && ` · ${summary?.roi}% sem custos`}
+            {temCusto && ` · ${formatPercent(summary?.roi)} sem custos`}
           </CardContent>
         </Card>
         <Card>

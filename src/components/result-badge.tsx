@@ -4,13 +4,13 @@ import { RESULT_LABELS } from "@/lib/format"
 import type { BetResult } from "@/lib/resources"
 
 const STYLES: Record<BetResult, string> = {
-  pending: "bg-muted text-muted-foreground border-transparent",
-  green: "bg-emerald-600 text-white border-transparent",
-  half_green: "bg-emerald-400/80 text-profit border-transparent",
-  red: "bg-rose-600 text-white border-transparent",
-  half_red: "bg-rose-400/80 text-loss border-transparent",
-  void: "bg-slate-400/70 text-slate-950 border-transparent",
-  cashout: "bg-amber-500 text-warning border-transparent",
+  pending: "border-warning/30 bg-warning/10 text-warning",
+  green: "border-transparent bg-profit text-background",
+  half_green: "border-profit/40 bg-profit/10 text-profit",
+  red: "border-transparent bg-loss text-background",
+  half_red: "border-loss/40 bg-loss/10 text-loss",
+  void: "border-border bg-muted text-muted-foreground",
+  cashout: "border-border bg-transparent text-foreground",
 }
 
 export function ResultBadge({ result }: { result: BetResult }) {

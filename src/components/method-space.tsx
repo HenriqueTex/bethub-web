@@ -94,7 +94,7 @@ export default function MethodSpace({
   const cards = (
     <div
       className={cn(
-        "mx-auto grid max-w-6xl grid-cols-1 min-[400px]:grid-cols-2 gap-2 sm:gap-4 [&>div]:min-w-0 [&_[data-slot=card-header]]:px-3 [&_[data-slot=card-content]]:px-3 sm:[&_[data-slot=card-header]]:px-6 sm:[&_[data-slot=card-content]]:px-6",
+        "mx-auto grid max-w-6xl grid-cols-1 min-[360px]:grid-cols-2 gap-2 sm:gap-4 [&>div]:min-w-0 [&_[data-slot=card-title]]:text-xl sm:[&_[data-slot=card-title]]:text-2xl [&_[data-slot=card-header]]:px-3 [&_[data-slot=card-content]]:px-3 sm:[&_[data-slot=card-header]]:px-6 sm:[&_[data-slot=card-content]]:px-6",
         resumoAbaixo ? "xl:grid-cols-2" : "xl:grid-cols-4"
       )}
     >
@@ -154,9 +154,6 @@ export default function MethodSpace({
   return (
     <div className="space-y-6">
       <div className="mx-auto max-w-6xl">
-        <p className="mb-1 text-xs font-medium uppercase tracking-widest text-primary">
-          Registro de apostas
-        </p>
         <h1 className="text-2xl font-bold">{methodName}</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           {methodName === "Surebet"

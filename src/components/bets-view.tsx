@@ -1092,7 +1092,7 @@ function SurebetCreateForm({
             </div>
             <Badge variant={calculation.inverseSum > 0 && calculation.inverseSum < 1 ? "default" : "outline"}>
               {calculation.inverseSum > 0
-                ? `${roundMoney((1 - calculation.inverseSum) * 100)}% margem`
+                ? `${formatPercent(roundMoney((1 - calculation.inverseSum) * 100))} margem`
                 : "Informe as odds"}
             </Badge>
           </div>
@@ -1319,7 +1319,7 @@ function SurebetCreateForm({
                           })
                           updateLeg(leg.id, { value: event.target.value })
                         }}
-                        placeholder="0.00"
+                        placeholder="0,00"
                         className={cn(
                           leg.value === "" && calculatedLeg?.stake ? "text-muted-foreground" : ""
                         )}
@@ -1353,7 +1353,7 @@ function SurebetCreateForm({
                                   : String(roundMoney(toNumber(digitado) / fator)),
                             })
                           }}
-                          placeholder="0.00"
+                          placeholder="0,00"
                           className={cn(
                             leg.value === "" && calculatedLeg?.stake ? "text-muted-foreground" : ""
                           )}
@@ -2002,7 +2002,7 @@ export default function BetsView({
                   <TableCell
                     className={cn(
                       "text-right font-medium",
-                      bet.profitAmount === null
+                      bet.profitAmount === null || bet.profitAmount === 0
                         ? "text-muted-foreground"
                         : bet.profitAmount >= 0
                           ? "text-profit"
@@ -2015,7 +2015,12 @@ export default function BetsView({
                     <div className="flex justify-end gap-1">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="outline" size="icon-sm" title="Liquidar">
+                          <Button
+                            variant={bet.result === "pending" ? "outline" : "ghost"}
+                            size="icon-sm"
+                            title="Liquidar"
+                            aria-label={`Liquidar ${bet.selection}`}
+                          >
                             <Gavel className="size-4" />
                           </Button>
                         </DropdownMenuTrigger>
@@ -2041,10 +2046,22 @@ export default function BetsView({
                           )}
                         </DropdownMenuContent>
                       </DropdownMenu>
-                      <Button variant="ghost" size="icon-sm" onClick={() => openEdit(bet)}>
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        title="Editar"
+                        aria-label={`Editar ${bet.selection}`}
+                        onClick={() => openEdit(bet)}
+                      >
                         <Pencil className="size-4" />
                       </Button>
-                      <Button variant="ghost" size="icon-sm" onClick={() => handleDelete(bet)}>
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        title="Excluir"
+                        aria-label={`Excluir ${bet.selection}`}
+                        onClick={() => handleDelete(bet)}
+                      >
                         <Trash2 className="size-4 text-loss" />
                       </Button>
                     </div>
@@ -2064,6 +2081,8 @@ export default function BetsView({
           <Button
             variant="outline"
             size="icon-sm"
+            title="Página anterior"
+            aria-label="Página anterior"
             disabled={page <= 1}
             onClick={() => setPage((current) => current - 1)}
           >
@@ -2072,6 +2091,8 @@ export default function BetsView({
           <Button
             variant="outline"
             size="icon-sm"
+            title="Próxima página"
+            aria-label="Próxima página"
             disabled={page >= bets.meta.lastPage}
             onClick={() => setPage((current) => current + 1)}
           >
