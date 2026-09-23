@@ -3,7 +3,7 @@
 import { FormEvent, useEffect, useMemo, useState } from "react"
 import Image from "next/image"
 import { toast } from "sonner"
-import { ArrowDownToLine, ArrowUpFromLine, Plus, Search, Trash2, Wallet } from "lucide-react"
+import { ArrowDownToLine, ArrowUpFromLine, Landmark, Plus, Search, Trash2, Wallet } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import {
@@ -40,6 +40,8 @@ import { formatBRL, formatDate, formatSigned } from "@/lib/format"
 import { cn } from "@/lib/utils"
 import { resources, Account, Bookmaker, Transaction } from "@/lib/resources"
 import { bookmakerLogo } from "@/lib/bookmaker-logos"
+import { EmptyState } from "@/components/empty-state"
+import { PageHeader } from "@/components/page-header"
 
 type StatusFilter = "all" | "with" | "without" | "inactive"
 
@@ -48,22 +50,24 @@ function BookmakerLogo({ name }: { name: string }) {
 
   if (!src) {
     return (
-      <span className="flex size-9 shrink-0 items-center justify-center rounded-md bg-muted text-xs font-semibold text-muted-foreground">
+      <span className="flex size-9 shrink-0 items-center justify-center rounded-[10px] border border-glass-border bg-foreground/[0.03] text-xs font-semibold text-muted-foreground">
         {name.slice(0, 2).toUpperCase()}
       </span>
     )
   }
 
   return (
-    <Image
-      src={src}
-      alt=""
-      aria-hidden
-      width={36}
-      height={36}
-      unoptimized
-      className="size-9 shrink-0 rounded-md object-contain"
-    />
+    <span className="flex size-9 shrink-0 overflow-hidden rounded-[10px] border border-glass-border">
+      <Image
+        src={src}
+        alt=""
+        aria-hidden
+        width={36}
+        height={36}
+        unoptimized
+        className="size-full object-contain"
+      />
+    </span>
   )
 }
 
@@ -200,12 +204,14 @@ export default function BookmakersPage() {
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
-      <div className="page-heading">
-        <h1 className="text-2xl font-bold">Casas & Contas</h1>
-        <Button onClick={() => setBookmakerDialog(true)}>
-          <Plus className="size-4" /> Nova casa
-        </Button>
-      </div>
+      <PageHeader
+        title="Casas & Contas"
+        actions={
+          <Button onClick={() => setBookmakerDialog(true)}>
+            <Plus className="size-4" /> Nova casa
+          </Button>
+        }
+      />
 
       <div className="flex flex-col gap-2 sm:flex-row">
         <div className="relative flex-1">
@@ -239,17 +245,21 @@ export default function BookmakersPage() {
       {loading ? (
         <p className="text-muted-foreground">Carregando...</p>
       ) : bookmakers.length === 0 ? (
-        <Card>
-          <CardContent className="py-10 text-center text-muted-foreground">
-            Nenhuma casa cadastrada. Comece criando uma casa de apostas e depois adicione sua
-            conta nela.
-          </CardContent>
+        <Card className="py-0">
+          <EmptyState
+            icon={Landmark}
+            title="Nenhuma casa cadastrada"
+            description="Comece criando uma casa de apostas e depois adicione sua conta nela."
+            action={
+              <Button onClick={() => setBookmakerDialog(true)}>
+                <Plus className="size-4" /> Nova casa
+              </Button>
+            }
+          />
         </Card>
       ) : filtered.length === 0 ? (
-        <Card>
-          <CardContent className="py-10 text-center text-muted-foreground">
-            Nenhuma casa encontrada com esses filtros.
-          </CardContent>
+        <Card className="py-0">
+          <EmptyState icon={Search} title="Nenhuma casa encontrada com esses filtros." />
         </Card>
       ) : (
         filtered.map((bookmaker) => (
@@ -260,28 +270,34 @@ export default function BookmakersPage() {
                 <CardTitle className="text-lg">{bookmaker.name}</CardTitle>
                 {!bookmaker.active && <Badge variant="secondary">Inativa</Badge>}
               </div>
-              <div className="flex flex-wrap items-center gap-3">
-                <span className="text-sm text-muted-foreground">Saldo total</span>
-                <span
-                  className={cn(
-                    "text-lg font-semibold",
-                    (bookmaker.totalBalance ?? 0) >= 0 ? "text-profit" : "text-loss"
-                  )}
-                >
-                  {formatBRL(bookmaker.totalBalance)}
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+                <span className="flex items-baseline gap-2">
+                  <span className="text-[11px] font-medium tracking-[0.06em] text-muted-foreground uppercase">
+                    Saldo total
+                  </span>
+                  <span
+                    className={cn(
+                      "numeric text-lg font-semibold tracking-tight",
+                      (bookmaker.totalBalance ?? 0) >= 0 ? "text-profit" : "text-loss"
+                    )}
+                  >
+                    {formatBRL(bookmaker.totalBalance)}
+                  </span>
                 </span>
-                <Button variant="outline" size="sm" onClick={() => setAccountDialog(bookmaker)}>
-                  <Plus className="size-4" /> Conta
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon-sm"
-                  title={`Excluir ${bookmaker.name}`}
-                  aria-label={`Excluir ${bookmaker.name}`}
-                  onClick={() => handleDeleteBookmaker(bookmaker)}
-                >
-                  <Trash2 className="size-4 text-loss" />
-                </Button>
+                <span className="flex items-center gap-1">
+                  <Button variant="outline" size="sm" onClick={() => setAccountDialog(bookmaker)}>
+                    <Plus className="size-4" /> Conta
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon-sm"
+                    title={`Excluir ${bookmaker.name}`}
+                    aria-label={`Excluir ${bookmaker.name}`}
+                    onClick={() => handleDeleteBookmaker(bookmaker)}
+                  >
+                    <Trash2 className="size-4 text-loss" />
+                  </Button>
+                </span>
               </div>
             </CardHeader>
             <CardContent>

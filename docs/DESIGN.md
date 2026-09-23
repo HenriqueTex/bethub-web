@@ -13,7 +13,7 @@ O welcome e o login definem a linguagem, e o restante do app a estende:
 
 `src/app/globals.css` é a fonte de verdade. Código novo não usa hexadecimal, `rgba()` nem `white/…` nos componentes: tudo vem dos tokens abaixo, inclusive gráficos, canvas, estados, menus e toasts.
 
-O alinhamento das telas a esta linguagem acontece em fases, conforme `docs/PLAN-alinhamento-visual.md`. As Fases 0 (tokens, grade e este documento), 1 (componentes base, shell e telas públicas) e 2 (Punter, Surebet, Dashboard e Todas as apostas) estão aplicadas. As telas auxiliares (Fase 3) ainda usam parte da composição antiga.
+O alinhamento das telas a esta linguagem acontece em fases, conforme `docs/PLAN-alinhamento-visual.md`. As quatro fases estão aplicadas: 0 (tokens, grade e este documento), 1 (componentes base, shell e telas públicas), 2 (Punter, Surebet, Dashboard e Todas as apostas) e 3 (Casas & Contas, Freebets, Tipsters, Custos, Configurações e toasts).
 
 ## Tokens
 
@@ -89,6 +89,11 @@ Texto verde sobre fundo claro usa `primary`, porque `brand-bright` não chega a 
 - **Formulários principais** ("Nova aposta" e calculadora de surebet): `panel-glass` com halo verde atrás, entrada `rise-panel` (300ms) e botão de registrar em `size="lg"`. No Punter, `.form-main` dá `rounded-control` a inputs e selects de 44px. Conta e tipster usam o Select do sistema, com `<input type="hidden">` levando o valor ao FormData; a conta é validada no envio, com mensagem e foco no campo.
 - **Lista de apostas:** tabela a partir de 768px. Abaixo disso, lista no formato "Últimas apostas" do preview: ponto de resultado, seleção, evento, data · casa · stake, odd em chip, lucro, badge e as mesmas ações.
 - **Gráfico de lucro acumulado:** moldura interna de vidro, eixos em Roboto Mono de 11px, ponto final destacado e resumo "início → atual" no cabeçalho.
+- **Badge:** pílula (`rounded-full`) com borda de vidro no `outline`; `destructive` usa `loss` tingido.
+- **EmptyState:** ícone em círculo com borda de vidro, título, descrição opcional e ação. Usado em Casas & Contas, Freebets, Tipsters e Custos, dentro do painel da lista.
+- **Tema em Configurações:** grupo segmentado Claro / Escuro / Sistema (rádios nativos, com setas do teclado). O menu compacto "Aparência" continua na sidebar e no cabeçalho.
+- **Toasts (Sonner):** fundo e borda de vidro, raio de 16px, `shadow-panel`. Sucesso, erro e aviso usam `profit`, `loss` e `warning` misturados ao fundo.
+- **Telas auxiliares:** `PageHeader` e `KpiCard` como nas principais (Freebets em `warning`, Custos em `loss` sem seta de tendência). Tabelas em painel opaco `rounded-panel`. Em Casas & Contas, o logo fica numa moldura de 10px e o saldo total aparece como microrrótulo + valor mono.
 - **AuthShell:** layout compartilhado entre login e cadastro (KineticGrid, cabeçalho só com o seletor de tema, painel de vidro de 420px, halo). Welcome, login e cadastro seguem o tema escolhido.
 
 ## Tipografia e números
@@ -149,6 +154,12 @@ A calculadora vem antes dos dados de registro, com pernas de 2 a 10 e back/lay, 
 ### Listas e telas auxiliares
 
 Todas as apostas, Casas & Contas, Freebets, Custos e Tipsters seguem a mesma linguagem de tabelas, badges e estados vazios.
+
+## Exceções conhecidas
+
+- **Grade de fundo** (`.grid-backdrop`): o detector do impeccable marca como padrão genérico, mas faz parte da identidade pedida para o produto.
+- **Degradê no título da splash** ("mais que uma planilha."): marcado pelo detector, mantido por decisão de produto.
+- **Cores fixas que ficam:** o escurecimento preto em volta do recorte de imagem na importação e o ícone branco sobre a foto no lightbox (ficam sobre imagem, não sobre o tema), o `#000` da máscara de revelação (canal alfa) e os seletores `#ccc` do Recharts em `ui/chart.tsx`.
 
 ## Validação
 

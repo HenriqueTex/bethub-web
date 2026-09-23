@@ -29,15 +29,27 @@ const Toaster = ({ ...props }: ToasterProps) => {
       }}
       style={
         {
-          "--normal-bg": "var(--popover)",
+          "--normal-bg": "var(--surface-glass)",
           "--normal-text": "var(--popover-foreground)",
-          "--normal-border": "var(--border)",
-          "--border-radius": "var(--radius)",
+          "--normal-border": "var(--surface-glass-border)",
+          "--success-bg": "color-mix(in oklab, var(--profit) 12%, var(--popover))",
+          "--success-border": "color-mix(in oklab, var(--profit) 35%, transparent)",
+          "--success-text": "var(--profit)",
+          "--error-bg": "color-mix(in oklab, var(--loss) 12%, var(--popover))",
+          "--error-border": "color-mix(in oklab, var(--loss) 35%, transparent)",
+          "--error-text": "var(--loss)",
+          "--warning-bg": "color-mix(in oklab, var(--warning) 12%, var(--popover))",
+          "--warning-border": "color-mix(in oklab, var(--warning) 35%, transparent)",
+          "--warning-text": "var(--warning)",
+          "--info-bg": "var(--surface-glass)",
+          "--info-border": "var(--surface-glass-border)",
+          "--info-text": "var(--popover-foreground)",
+          "--border-radius": "16px",
         } as React.CSSProperties
       }
       toastOptions={{
         classNames: {
-          toast: "cn-toast",
+          toast: "cn-toast shadow-panel backdrop-blur-xl",
         },
       }}
       {...props}

@@ -112,7 +112,7 @@ export function FreebetPopover({
             aria-pressed={active}
             className={cn(
               active &&
-                "bg-amber-500/15 text-warning hover:bg-amber-500/25 hover:text-warning"
+                "bg-warning/15 text-warning hover:bg-warning/25 hover:text-warning"
             )}
           >
             <Gift className="size-4" />

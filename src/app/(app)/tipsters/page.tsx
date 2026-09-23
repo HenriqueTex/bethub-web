@@ -2,7 +2,9 @@
 
 import { FormEvent, useEffect, useState } from "react"
 import { toast } from "sonner"
-import { Pencil, Plus, Trash2 } from "lucide-react"
+import { Megaphone, Pencil, Plus, Trash2 } from "lucide-react"
+import { EmptyState } from "@/components/empty-state"
+import { PageHeader } from "@/components/page-header"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import {
@@ -84,49 +86,51 @@ export default function TipstersPage() {
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
-      <div className="page-heading">
-        <h1 className="text-2xl font-bold">Tipsters</h1>
-        <Dialog
-          open={open}
-          onOpenChange={(value) => {
-            setOpen(value)
-            if (!value) setEditing(null)
-          }}
-        >
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="size-4" /> Novo tipster
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>{editing ? "Editar tipster" : "Novo tipster"}</DialogTitle>
-            </DialogHeader>
-            <form onSubmit={handleSubmit} className="grid gap-4">
-              <div className="grid gap-2">
-                <Label htmlFor="name">Nome</Label>
-                <Input id="name" name="name" required defaultValue={editing?.name ?? ""} />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="channel">Canal (opcional)</Label>
-                <Input
-                  id="channel"
-                  name="channel"
-                  placeholder="@canal ou link"
-                  defaultValue={editing?.channel ?? ""}
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="notes">Notas (opcional)</Label>
-                <Input id="notes" name="notes" defaultValue={editing?.notes ?? ""} />
-              </div>
-              <Button type="submit" disabled={saving}>
-                {saving ? "Salvando..." : "Salvar"}
+      <PageHeader
+        title="Tipsters"
+        actions={
+          <Dialog
+            open={open}
+            onOpenChange={(value) => {
+              setOpen(value)
+              if (!value) setEditing(null)
+            }}
+          >
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="size-4" /> Novo tipster
               </Button>
-            </form>
-          </DialogContent>
-        </Dialog>
-      </div>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>{editing ? "Editar tipster" : "Novo tipster"}</DialogTitle>
+              </DialogHeader>
+              <form onSubmit={handleSubmit} className="grid gap-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="name">Nome</Label>
+                  <Input id="name" name="name" required defaultValue={editing?.name ?? ""} />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="channel">Canal (opcional)</Label>
+                  <Input
+                    id="channel"
+                    name="channel"
+                    placeholder="@canal ou link"
+                    defaultValue={editing?.channel ?? ""}
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="notes">Notas (opcional)</Label>
+                  <Input id="notes" name="notes" defaultValue={editing?.notes ?? ""} />
+                </div>
+                <Button type="submit" disabled={saving}>
+                  {saving ? "Salvando..." : "Salvar"}
+                </Button>
+              </form>
+            </DialogContent>
+          </Dialog>
+        }
+      />
 
       <div className="overflow-hidden rounded-panel border bg-card shadow-panel">
         <Table>
@@ -146,9 +150,22 @@ export default function TipstersPage() {
                 </TableCell>
               </TableRow>
             ) : tipsters.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={4} className="text-center text-muted-foreground">
-                  Nenhum tipster cadastrado
+              <TableRow className="hover:bg-transparent">
+                <TableCell colSpan={4} className="p-0">
+                  <EmptyState
+                    icon={Megaphone}
+                    title="Nenhum tipster cadastrado"
+                    action={
+                      <Button
+                        onClick={() => {
+                          setEditing(null)
+                          setOpen(true)
+                        }}
+                      >
+                        <Plus className="size-4" /> Novo tipster
+                      </Button>
+                    }
+                  />
                 </TableCell>
               </TableRow>
             ) : (

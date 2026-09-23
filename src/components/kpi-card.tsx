@@ -7,11 +7,13 @@ export function KpiCard({
   value,
   detail,
   tone = "default",
+  trend = true,
 }: {
   label: string
   value: ReactNode
   detail?: ReactNode
-  tone?: "default" | "profit" | "loss"
+  tone?: "default" | "profit" | "loss" | "warning"
+  trend?: boolean
 }) {
   const Trend = tone === "loss" ? TrendingDown : TrendingUp
 
@@ -24,10 +26,13 @@ export function KpiCard({
         className={cn(
           "numeric mt-2 flex items-center gap-1.5 text-lg leading-snug font-semibold tracking-tight [overflow-wrap:anywhere] sm:text-xl",
           tone === "profit" && "text-profit",
-          tone === "loss" && "text-loss"
+          tone === "loss" && "text-loss",
+          tone === "warning" && "text-warning"
         )}
       >
-        {tone !== "default" && <Trend className="size-4 shrink-0" aria-hidden="true" />}
+        {trend && (tone === "profit" || tone === "loss") && (
+          <Trend className="size-4 shrink-0" aria-hidden="true" />
+        )}
         <span className="min-w-0">{value}</span>
       </p>
       {detail && <p className="mt-2 text-xs leading-relaxed text-muted-foreground">{detail}</p>}

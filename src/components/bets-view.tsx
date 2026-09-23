@@ -1213,7 +1213,7 @@ function SurebetCreateForm({
                       <div className="flex flex-wrap items-center gap-2">
                         <Badge variant="outline">Perna {index + 1}</Badge>
                         {leg.freebet.mode === "is" && (
-                          <Badge className="border-transparent bg-amber-500/15 text-warning">
+                          <Badge className="border-transparent bg-warning/15 text-warning">
                             Freebet
                           </Badge>
                         )}
@@ -1238,7 +1238,7 @@ function SurebetCreateForm({
                           }
                           className={cn(
                             anchorLegId === leg.id &&
-                              "bg-emerald-500/10 text-profit hover:bg-emerald-500/20 hover:text-profit"
+                              "bg-profit/10 text-profit hover:bg-profit/20 hover:text-profit"
                           )}
                         >
                           <Anchor className="size-4" />
@@ -1390,7 +1390,7 @@ function SurebetCreateForm({
                             "h-9 justify-center font-semibold",
                             leg.type === "back"
                               ? "border-primary/40 bg-primary/10 text-primary hover:bg-primary/20"
-                              : "border-rose-500/40 bg-rose-500/10 text-loss hover:bg-rose-500/20 dark:text-loss"
+                              : "border-loss/40 bg-loss/10 text-loss hover:bg-loss/20"
                           )}
                           onClick={() =>
                             updateLeg(leg.id, { type: leg.type === "back" ? "lay" : "back" })

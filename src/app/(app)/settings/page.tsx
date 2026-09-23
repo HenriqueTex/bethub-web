@@ -2,7 +2,8 @@
 
 import { FormEvent, useEffect, useState } from "react"
 import { toast } from "sonner"
-import { ThemeSwitcher } from "@/components/theme-switcher"
+import { ThemeSegmented } from "@/components/theme-switcher"
+import { PageHeader } from "@/components/page-header"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -44,10 +45,18 @@ export default function SettingsPage() {
 
   return (
     <div className="mx-auto max-w-xl space-y-6">
-      <h1 className="text-2xl font-bold">Configurações</h1>
+      <PageHeader title="Configurações" />
       <Card>
-        <CardHeader><CardTitle>Aparência</CardTitle><CardDescription>Escolha um tema para este dispositivo. O modo Sistema acompanha a preferência do aparelho.</CardDescription></CardHeader>
-        <CardContent><ThemeSwitcher /></CardContent>
+        <CardHeader>
+          <CardTitle>Aparência</CardTitle>
+          <CardDescription>
+            Escolha um tema para este dispositivo. O modo Sistema acompanha a preferência do
+            aparelho.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ThemeSegmented />
+        </CardContent>
       </Card>
       <Card>
         <form onSubmit={handleSubmit}>

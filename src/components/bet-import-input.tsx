@@ -292,7 +292,7 @@ export function BetImportInput({
                 className="max-h-[45vh] max-w-full object-contain"
               />
               <div
-                className="pointer-events-none absolute border-2 border-emerald-500 shadow-[0_0_0_9999px_#0008]"
+                className="pointer-events-none absolute border-2 border-primary shadow-[0_0_0_9999px_#0008]"
                 style={{
                   left: crop.left + "%",
                   top: crop.top + "%",

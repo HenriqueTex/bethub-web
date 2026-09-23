@@ -2,7 +2,10 @@
 
 import { FormEvent, useEffect, useState } from "react"
 import { toast } from "sonner"
-import { Plus, Trash2, Pencil } from "lucide-react"
+import { Plus, Receipt, Trash2, Pencil } from "lucide-react"
+import { EmptyState } from "@/components/empty-state"
+import { KpiCard } from "@/components/kpi-card"
+import { PageHeader } from "@/components/page-header"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
@@ -150,27 +153,24 @@ export default function CostsPage() {
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
-      <div className="page-heading">
-        <h1 className="text-2xl font-bold">Custos</h1>
-        <Button onClick={() => openDialog("new")}>
-          <Plus className="size-4" /> Novo custo
-        </Button>
-      </div>
+      <PageHeader
+        title="Custos"
+        actions={
+          <Button onClick={() => openDialog("new")}>
+            <Plus className="size-4" /> Novo custo
+          </Button>
+        }
+      />
 
-      <Card>
-        <CardContent className="flex flex-wrap items-baseline gap-x-8 gap-y-2 py-4">
-          <div>
-            <p className="text-xs text-muted-foreground">Custo no mês</p>
-            <p className="text-2xl font-bold text-loss">
-              {formatBRL(summary?.total ?? 0)}
-            </p>
-          </div>
-          <p className="text-xs text-muted-foreground">
-            {period.from.split("-").reverse().join("/")} a{" "}
-            {period.to.split("-").reverse().join("/")}
-          </p>
-        </CardContent>
-      </Card>
+      <div className="grid grid-cols-1 gap-2 min-[360px]:grid-cols-2 sm:gap-4 xl:grid-cols-4">
+        <KpiCard
+          label="Custo no mês"
+          tone="loss"
+          trend={false}
+          value={formatBRL(summary?.total ?? 0)}
+          detail={`${period.from.split("-").reverse().join("/")} a ${period.to.split("-").reverse().join("/")}`}
+        />
+      </div>
 
       {rateados.length > 0 && (
         <Card>
@@ -193,83 +193,87 @@ export default function CostsPage() {
       {loading ? (
         <p className="text-muted-foreground">Carregando...</p>
       ) : costs.length === 0 ? (
-        <Card>
-          <CardContent className="py-10 text-center text-muted-foreground">
-            Nenhum custo cadastrado. Lance aqui assinaturas de grupo, contas e
-            outras despesas para que entrem no seu resultado.
-          </CardContent>
+        <Card className="py-0">
+          <EmptyState
+            icon={Receipt}
+            title="Nenhum custo cadastrado"
+            description="Lance aqui assinaturas de grupo, contas e outras despesas para que entrem no seu resultado."
+            action={
+              <Button onClick={() => openDialog("new")}>
+                <Plus className="size-4" /> Novo custo
+              </Button>
+            }
+          />
         </Card>
       ) : (
-        <Card>
-          <CardContent className="p-0">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Descrição</TableHead>
-                  <TableHead>Tipo</TableHead>
-                  <TableHead>Início</TableHead>
-                  <TableHead>Rateio</TableHead>
-                  <TableHead className="text-right">Valor</TableHead>
-                  <TableHead className="w-20" />
+        <div className="overflow-hidden rounded-panel border bg-card shadow-panel">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Descrição</TableHead>
+                <TableHead>Tipo</TableHead>
+                <TableHead>Início</TableHead>
+                <TableHead>Rateio</TableHead>
+                <TableHead className="text-right">Valor</TableHead>
+                <TableHead className="w-20" />
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {costs.map((cost) => (
+                <TableRow
+                  key={cost.id}
+                  className={cn(cost.endsOn && "opacity-60")}
+                >
+                  <TableCell className="font-medium">
+                    {cost.description}
+                    {cost.endsOn && (
+                      <Badge variant="secondary" className="ml-2">
+                        Encerrado
+                      </Badge>
+                    )}
+                  </TableCell>
+                  <TableCell>{KIND_LABEL[cost.kind]}</TableCell>
+                  <TableCell>
+                    {cost.startsOn?.slice(0, 10).split("-").reverse().join("/")}
+                  </TableCell>
+                  <TableCell className="text-sm text-muted-foreground">
+                    {cost.tipsters?.length
+                      ? cost.tipsters.map((t) => t.name).join(", ")
+                      : "Geral"}
+                  </TableCell>
+                  <TableCell className="text-right font-semibold">
+                    {formatBRL(cost.amount)}
+                    {cost.kind === "monthly" && (
+                      <span className="text-xs text-muted-foreground">/mês</span>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex justify-end gap-1">
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        title="Editar custo"
+                        aria-label="Editar custo"
+                        onClick={() => openDialog(cost)}
+                      >
+                        <Pencil className="size-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        title="Excluir custo"
+                        aria-label="Excluir custo"
+                        onClick={() => remove(cost)}
+                      >
+                        <Trash2 className="size-4 text-loss" />
+                      </Button>
+                    </div>
+                  </TableCell>
                 </TableRow>
-              </TableHeader>
-              <TableBody>
-                {costs.map((cost) => (
-                  <TableRow
-                    key={cost.id}
-                    className={cn(cost.endsOn && "opacity-60")}
-                  >
-                    <TableCell className="font-medium">
-                      {cost.description}
-                      {cost.endsOn && (
-                        <Badge variant="secondary" className="ml-2">
-                          Encerrado
-                        </Badge>
-                      )}
-                    </TableCell>
-                    <TableCell>{KIND_LABEL[cost.kind]}</TableCell>
-                    <TableCell>
-                      {cost.startsOn?.slice(0, 10).split("-").reverse().join("/")}
-                    </TableCell>
-                    <TableCell className="text-sm text-muted-foreground">
-                      {cost.tipsters?.length
-                        ? cost.tipsters.map((t) => t.name).join(", ")
-                        : "Geral"}
-                    </TableCell>
-                    <TableCell className="text-right font-semibold">
-                      {formatBRL(cost.amount)}
-                      {cost.kind === "monthly" && (
-                        <span className="text-xs text-muted-foreground">/mês</span>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex justify-end gap-1">
-                        <Button
-                          variant="ghost"
-                          size="icon-sm"
-                          title="Editar custo"
-                          aria-label="Editar custo"
-                          onClick={() => openDialog(cost)}
-                        >
-                          <Pencil className="size-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon-sm"
-                          title="Excluir custo"
-                          aria-label="Excluir custo"
-                          onClick={() => remove(cost)}
-                        >
-                          <Trash2 className="size-4 text-loss" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       )}
 
       <Dialog open={!!dialog} onOpenChange={(open) => !open && setDialog(null)}>
