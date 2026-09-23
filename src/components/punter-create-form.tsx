@@ -314,7 +314,7 @@ export function PunterCreateForm({
   return (
     <form
       onSubmit={submit}
-      className="min-w-0 rounded-lg border bg-card p-4 shadow-sm sm:p-5"
+      className="min-w-0 rounded-panel border bg-card p-4 shadow-panel sm:p-5"
     >
       <div className="mb-4">
         <h2 className="text-lg font-semibold">Nova aposta</h2>

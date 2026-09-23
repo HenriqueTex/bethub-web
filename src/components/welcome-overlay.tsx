@@ -11,7 +11,7 @@ export function WelcomeOverlay({
 }) {
   return (
     <div className="fixed inset-0 z-0 overflow-y-auto">
-      <KineticGrid className="dark">
+      <KineticGrid>
         <div className="flex min-h-dvh flex-col">
           <SplashHero onStart={onStart} />
         </div>

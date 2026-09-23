@@ -2,12 +2,18 @@ import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
-function Card({ className, ...props }: React.ComponentProps<"div">) {
+function Card({
+	className,
+	variant = "default",
+	...props
+}: React.ComponentProps<"div"> & { variant?: "default" | "glass" }) {
 	return (
 		<div
 			data-slot="card"
+			data-variant={variant}
 			className={cn(
-				"bg-card text-card-foreground flex flex-col min-w-0 gap-5 rounded-xl border py-5 shadow-none",
+				"text-card-foreground flex flex-col min-w-0 gap-5 rounded-panel border py-5 shadow-panel",
+				variant === "glass" ? "panel-glass" : "bg-card",
 				className
 			)}
 			{...props}

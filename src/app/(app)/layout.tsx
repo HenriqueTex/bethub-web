@@ -27,6 +27,7 @@ import {
   SheetTrigger
 } from "@/components/ui/sheet"
 import { ThemeSwitcher } from "@/components/theme-switcher"
+import { BrandMark } from "@/components/landing/brand-mark"
 import { Toaster } from "@/components/ui/sonner"
 import { cn } from "@/lib/utils"
 import { User, getToken, logout, me } from "@/lib/api"
@@ -75,8 +76,9 @@ export default function AppLayout({ children }: { children: ReactNode }) {
 
   if (!user) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <p className="text-muted-foreground">Carregando...</p>
+      <div className="grid-backdrop flex min-h-dvh flex-col items-center justify-center gap-4">
+        <BrandMark />
+        <p className="text-sm text-muted-foreground">Carregando...</p>
       </div>
     )
   }
@@ -96,7 +98,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
         {[MAIN_NAV, NAV].map((items, group) => (
           <div
             key={group}
-            className={group ? "space-y-1 border-t pt-3 mt-3" : "space-y-1"}
+            className={group ? "mt-3 space-y-1 border-t border-glass-border pt-3" : "space-y-1"}
           >
             {items.map(({ href, label, icon: Icon }) => (
               <Link
@@ -107,14 +109,19 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                 aria-current={pathname.startsWith(href) ? "page" : undefined}
                 onClick={() => setMobileOpen(false)}
                 className={cn(
-                  "flex min-h-11 items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-accent",
+                  "flex min-h-11 items-center gap-3 rounded-control-sm px-3 py-2 text-sm font-medium text-muted-foreground transition-colors duration-150 hover:bg-foreground/[0.05] hover:text-foreground",
                   compact && "justify-center px-0",
                   pathname.startsWith(href) &&
-                    "bg-sidebar-accent text-sidebar-accent-foreground ring-1 ring-primary/20",
+                    "bg-primary/10 text-foreground ring-1 ring-primary/25 hover:bg-primary/10",
                   group === 0 && "font-semibold"
                 )}
               >
-                <Icon className="size-5 shrink-0" />
+                <Icon
+                  className={cn(
+                    "size-5 shrink-0",
+                    pathname.startsWith(href) && "text-primary dark:text-brand-bright"
+                  )}
+                />
                 {!compact && label}
               </Link>
             ))}
@@ -132,19 +139,19 @@ export default function AppLayout({ children }: { children: ReactNode }) {
         id="desktop-sidebar"
         aria-label="Menu lateral"
         className={cn(
-          "fixed inset-y-0 left-0 z-20 hidden flex-col border-r bg-sidebar md:flex",
+          "fixed inset-y-0 left-0 z-20 hidden flex-col border-r panel-glass md:flex",
           collapsed ? "w-16" : "w-60"
         )}
       >
         <div
           className={cn(
-            "flex h-16 items-center border-b",
+            "flex h-16 items-center border-b border-glass-border",
             collapsed ? "justify-center" : "justify-between px-4"
           )}
         >
           {!collapsed && (
-            <Link href="/dashboard" className="text-lg font-bold">
-              Bet<span className="text-profit">Hub</span>
+            <Link href="/dashboard" aria-label="BetHub, ir para o dashboard">
+              <BrandMark />
             </Link>
           )}
           <Button
@@ -167,7 +174,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
           </Button>
         </div>
         {navigation(collapsed)}
-        <div className="border-t p-3">
+        <div className="border-t border-glass-border p-3">
           <ThemeSwitcher compact={collapsed} />
           {!collapsed && (
             <p className="truncate px-3 pb-2 text-xs text-muted-foreground">
@@ -186,7 +193,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
           </Button>
         </div>
       </aside>
-      <div className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b bg-background px-4 md:hidden">
+      <div className="sticky top-0 z-30 flex h-[calc(3.5rem+env(safe-area-inset-top))] items-center gap-3 border-b panel-glass px-4 pt-[env(safe-area-inset-top)] md:hidden">
         <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
           <SheetTrigger asChild>
             <Button variant="ghost" size="icon" aria-label="Abrir menu">
@@ -199,10 +206,12 @@ export default function AppLayout({ children }: { children: ReactNode }) {
             aria-describedby={undefined}
           >
             <SheetHeader>
-              <SheetTitle>BetHub</SheetTitle>
+              <SheetTitle>
+                <BrandMark />
+              </SheetTitle>
             </SheetHeader>
             {navigation(false)}
-            <div className="border-t p-3">
+            <div className="border-t border-glass-border p-3">
               <p className="truncate px-3 text-xs text-muted-foreground">
                 {user.email}
               </p>
@@ -217,8 +226,8 @@ export default function AppLayout({ children }: { children: ReactNode }) {
             </div>
           </SheetContent>
         </Sheet>
-        <Link href="/punter" className="font-bold">
-          Bet<span className="text-profit">Hub</span>
+        <Link href="/punter" aria-label="BetHub, ir para o Punter">
+          <BrandMark />
         </Link>
         <div className="ml-auto"><ThemeSwitcher compact /></div>
       </div>

@@ -23,16 +23,16 @@ export function PortfolioPreview() {
 
       <section
         aria-label="Exemplo ilustrativo do painel de banca"
-        className="rounded-[20px] border border-white/10 bg-[rgba(10,12,11,0.70)] p-4 shadow-[0_24px_80px_-40px_rgba(0,0,0,0.9)] backdrop-blur-xl sm:p-5"
+        className="rounded-panel border border-glass-border panel-glass p-4 shadow-panel sm:p-5"
       >
         <header className="flex items-center justify-between gap-3">
-          <h2 className="flex items-center gap-2 text-[13.5px] font-semibold tracking-tight text-white">
+          <h2 className="flex items-center gap-2 text-[13.5px] font-semibold tracking-tight text-foreground">
             Visão geral
-            <span className="rounded border border-white/10 bg-white/[0.05] px-1.5 py-0.5 text-[9.5px] font-medium tracking-[0.06em] text-white/45 uppercase">
+            <span className="rounded border border-glass-border bg-foreground/[0.05] px-1.5 py-0.5 text-[9.5px] font-medium tracking-[0.06em] text-muted-foreground uppercase">
               Exemplo
             </span>
           </h2>
-          <span className="rounded-full border border-white/10 bg-white/[0.03] px-2.5 py-1 text-[11px] text-white/55">
+          <span className="rounded-full border border-glass-border bg-foreground/[0.03] px-2.5 py-1 text-[11px] text-muted-foreground">
             Últimos 30 dias
           </span>
         </header>
@@ -43,16 +43,16 @@ export function PortfolioPreview() {
           <MetricCard label="ROI" value="+12,8%" detail="128 apostas" trend="up" positive />
         </div>
 
-        <div className="mt-5 rounded-xl border border-white/10 bg-white/[0.03] p-3 sm:p-3.5">
+        <div className="mt-5 rounded-xl border border-glass-border bg-foreground/[0.03] p-3 sm:p-3.5">
           <BankrollChart />
         </div>
 
         <div className="mt-5">
-          <h3 className="text-[11.5px] font-medium tracking-[0.06em] text-white/55 uppercase">
+          <h3 className="text-[11.5px] font-medium tracking-[0.06em] text-muted-foreground uppercase">
             Últimas apostas
           </h3>
 
-          <ul className="mt-2.5 divide-y divide-white/[0.07]">
+          <ul className="mt-2.5 divide-y divide-foreground/[0.07]">
             {BETS.map((bet, index) => (
               <li
                 key={bet.event}
@@ -77,11 +77,11 @@ export function PortfolioPreview() {
                 </span>
 
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-[12.5px] font-medium text-white">{bet.event}</p>
-                  <p className="truncate text-[11px] text-white/55">{bet.market}</p>
+                  <p className="truncate text-[12.5px] font-medium text-foreground">{bet.event}</p>
+                  <p className="truncate text-[11px] text-muted-foreground">{bet.market}</p>
                 </div>
 
-                <span className="numeric shrink-0 rounded-md border border-white/10 bg-white/[0.03] px-1.5 py-0.5 text-[11px] text-white/70">
+                <span className="numeric shrink-0 rounded-md border border-glass-border bg-foreground/[0.03] px-1.5 py-0.5 text-[11px] text-foreground/70">
                   {bet.odd}
                 </span>
 

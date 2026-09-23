@@ -26,8 +26,67 @@ const COMPACT_BREAKPOINT = 768;
 const RIPPLE_SPEED = 800;
 const LERP_SPEED = 0.08;
 
-const LINE_BASE = { r: 255, g: 255, b: 255, a: 0.055 };
-const NODE_BASE = { r: 255, g: 255, b: 255, a: 0.12 };
+type Rgb = { r: number; g: number; b: number };
+type Rgba = Rgb & { a: number };
+
+interface Palette {
+  bg: string;
+  line: Rgba;
+  node: Rgba;
+  dot: string;
+  lineActive: Rgba;
+  nodeActive: Rgba;
+  glow: string;
+  ripple: string;
+}
+
+const MONOCHROME: Palette = {
+  bg: "#000000",
+  line: { r: 255, g: 255, b: 255, a: 0.055 },
+  node: { r: 255, g: 255, b: 255, a: 0.12 },
+  dot: "rgba(255,255,255,0.035)",
+  lineActive: { r: 255, g: 255, b: 255, a: 0.7 },
+  nodeActive: { r: 255, g: 255, b: 255, a: 1.0 },
+  glow: "255,255,255",
+  ripple: "255,255,255",
+};
+
+const WHITE: Rgb = { r: 255, g: 255, b: 255 };
+const GREEN: Rgb = { r: 34, g: 197, b: 94 };
+const GREEN_BRIGHT: Rgb = { r: 74, g: 222, b: 128 };
+
+/**
+ * As cores vêm dos tokens de globals.css para a grade acompanhar o tema. Se o CSS
+ * ainda não tiver as variáveis (cache velho do dev server, por exemplo), cada valor
+ * cai no padrão do tema escuro em vez de virar uma cor inválida no canvas.
+ */
+function readPalette(): Palette {
+  const css = getComputedStyle(document.documentElement);
+  const rgb = (name: string, fallback: Rgb): Rgb => {
+    const parts = css.getPropertyValue(name).trim().split(/[\s,]+/).map(Number);
+    if (parts.length !== 3 || parts.some((n) => !Number.isFinite(n))) return fallback;
+    const [r, g, b] = parts;
+    return { r, g, b };
+  };
+  const alpha = (name: string, fallback: number) => {
+    const value = Number.parseFloat(css.getPropertyValue(name));
+    return Number.isFinite(value) ? value : fallback;
+  };
+  const base = rgb("--grid-rgb", WHITE);
+  const active = rgb("--grid-active-rgb", GREEN);
+  const nodeActive = rgb("--grid-node-active-rgb", GREEN_BRIGHT);
+  return {
+    bg: css.getPropertyValue("--background").trim() || "#0b0d0c",
+    line: { ...base, a: alpha("--grid-line-alpha", 0.055) },
+    node: { ...base, a: alpha("--grid-node-alpha", 0.12) },
+    dot: `rgba(${base.r},${base.g},${base.b},${alpha("--grid-dot-alpha", 0.035)})`,
+    lineActive: { ...active, a: 0.45 },
+    nodeActive: { ...nodeActive, a: 0.9 },
+    glow: `${active.r},${active.g},${active.b}`,
+    ripple: `${nodeActive.r},${nodeActive.g},${nodeActive.b}`,
+  };
+}
+
 const NODE_BASE_RADIUS = 1.5;
 const NODE_ACTIVE_RADIUS = 2.9;
 
@@ -51,8 +110,8 @@ function lerpN(a: number, b: number, t: number) {
 }
 
 function lerpColor(
-  base: { r: number; g: number; b: number; a: number },
-  active: { r: number; g: number; b: number; a: number },
+  base: Rgba,
+  active: Rgba,
   t: number,
 ): string {
   const r = Math.round(lerpN(base.r, active.r, t));
@@ -78,6 +137,7 @@ export default function KineticGrid({
   const ripplesRef = useRef<Ripple[]>([]);
   const rafRef = useRef<number>(0);
   const sizeRef = useRef<{ w: number; h: number }>({ w: 0, h: 0 });
+  const paletteRef = useRef<Palette>(MONOCHROME);
 
   const getWarpedPoint = useCallback(
     (
@@ -163,22 +223,7 @@ export default function KineticGrid({
       const ripples = ripplesRef.current;
       const compact = W < COMPACT_BREAKPOINT;
 
-      const theme = {
-        default: {
-          bg: "#0b0d0c",
-          lineActive: { r: 34, g: 197, b: 94, a: 0.45 },
-          nodeActive: { r: 74, g: 222, b: 128, a: 0.9 },
-          glow: "34,197,94",
-          ripple: "74,222,128",
-        },
-        monochrome: {
-          bg: "#000000",
-          lineActive: { r: 255, g: 255, b: 255, a: 0.7 },
-          nodeActive: { r: 255, g: 255, b: 255, a: 1.0 },
-          glow: "255,255,255",
-          ripple: "255,255,255",
-        },
-      }[globalColor ?? "default"];
+      const theme = paletteRef.current;
 
       ctx.clearRect(0, 0, W, H);
 
@@ -186,7 +231,7 @@ export default function KineticGrid({
       ctx.fillRect(0, 0, W, H);
 
       if (!compact) {
-        ctx.fillStyle = "rgba(255,255,255,0.035)";
+        ctx.fillStyle = theme.dot;
         for (let x = DOT_SPACING / 2; x < W; x += DOT_SPACING) {
           for (let y = DOT_SPACING / 2; y < H; y += DOT_SPACING) {
             ctx.beginPath();
@@ -238,7 +283,7 @@ export default function KineticGrid({
         ctx.beginPath();
         ctx.moveTo(p1.x, p1.y);
         ctx.lineTo(p2.x, p2.y);
-        ctx.strokeStyle = lerpColor(LINE_BASE, theme.lineActive, t);
+        ctx.strokeStyle = lerpColor(theme.line, theme.lineActive, t);
         ctx.lineWidth = lerpN(0.8, 1.35, t);
         ctx.stroke();
       };
@@ -290,7 +335,7 @@ export default function KineticGrid({
 
           ctx.beginPath();
           ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
-          ctx.fillStyle = lerpColor(NODE_BASE, theme.nodeActive, t);
+          ctx.fillStyle = lerpColor(theme.node, theme.nodeActive, t);
           ctx.fill();
         }
       }
@@ -304,7 +349,7 @@ export default function KineticGrid({
         ctx.stroke();
       }
     },
-    [getWarpedPoint, globalColor],
+    [getWarpedPoint],
   );
 
   useEffect(() => {
@@ -314,6 +359,17 @@ export default function KineticGrid({
     const reduceMotion = window.matchMedia(
       "(prefers-reduced-motion: reduce)",
     ).matches;
+
+    const refreshPalette = () => {
+      paletteRef.current = globalColor === "monochrome" ? MONOCHROME : readPalette();
+      if (reduceMotion) draw(performance.now());
+    };
+    refreshPalette();
+    const themeObserver = new MutationObserver(refreshPalette);
+    themeObserver.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["class", "style"],
+    });
 
     const setSize = () => {
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -332,7 +388,10 @@ export default function KineticGrid({
     window.addEventListener("resize", setSize);
 
     if (reduceMotion) {
-      return () => window.removeEventListener("resize", setSize);
+      return () => {
+        window.removeEventListener("resize", setSize);
+        themeObserver.disconnect();
+      };
     }
 
     const onPointerMove = (e: PointerEvent) => {
@@ -373,6 +432,7 @@ export default function KineticGrid({
     rafRef.current = requestAnimationFrame(animate);
 
     return () => {
+      themeObserver.disconnect();
       window.removeEventListener("resize", setSize);
       window.removeEventListener("pointermove", onPointerMove);
       document.removeEventListener("pointerleave", onPointerLeave);
@@ -381,13 +441,13 @@ export default function KineticGrid({
         cancelAnimationFrame(rafRef.current);
       }
     };
-  }, [draw]);
+  }, [draw, globalColor]);
 
   return (
     <div
       className={cn(
         "relative w-full min-h-screen overflow-hidden",
-        globalColor === "monochrome" ? "bg-[#000000]" : "bg-[#0b0d0c]",
+        globalColor === "monochrome" ? "bg-[#000000]" : "bg-background",
         className,
       )}
     >
@@ -403,7 +463,7 @@ export default function KineticGrid({
           className="pointer-events-none fixed inset-0 z-[1]"
           style={{
             background:
-              "radial-gradient(circle at center, rgba(34,197,94,0.07), transparent 45%)",
+              "radial-gradient(circle at center, color-mix(in oklab, var(--halo, rgba(34,197,94,0.1)) 70%, transparent), transparent 45%)",
           }}
         />
       )}

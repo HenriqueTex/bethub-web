@@ -128,7 +128,7 @@ export default function TipstersPage() {
         </Dialog>
       </div>
 
-      <div className="rounded-lg border bg-card">
+      <div className="overflow-hidden rounded-panel border bg-card shadow-panel">
         <Table>
           <TableHeader>
             <TableRow>

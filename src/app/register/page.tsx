@@ -3,16 +3,9 @@
 import { FormEvent, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { ThemeSwitcher } from "@/components/theme-switcher"
+import { ArrowRight, Loader2 } from "lucide-react"
+import { AuthShell, authFieldClassName } from "@/components/auth-shell"
 import { Button } from "@/components/ui/button"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { ApiError, register } from "@/lib/api"
@@ -43,64 +36,89 @@ export default function RegisterPage() {
   }
 
   return (
-    <main className="flex min-h-dvh items-center justify-center bg-background p-4 py-20">
-      <div className="absolute right-4 top-4"><ThemeSwitcher compact /></div>
-      <Card className="w-full max-w-sm border-t-2 border-t-primary">
-        <CardHeader>
-          <CardTitle>Criar conta</CardTitle>
-          <CardDescription>Cadastre-se para acessar o BetHub</CardDescription>
-        </CardHeader>
-        <form onSubmit={handleSubmit}>
-          <CardContent className="grid gap-4">
-            <div className="grid gap-2">
-              <Label htmlFor="fullName">Nome completo</Label>
-              <Input
-                id="fullName"
-                placeholder="Seu nome"
-                required
-                minLength={2}
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="email">E-mail</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="voce@exemplo.com"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="password">Senha</Label>
-              <Input
-                id="password"
-                type="password"
-                required
-                minLength={8}
-                placeholder="Mínimo de 8 caracteres"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </div>
-            {error && <p className="text-sm text-destructive">{error}</p>}
-          </CardContent>
-          <CardFooter className="mt-6 flex-col gap-3">
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Criando conta..." : "Criar conta"}
-            </Button>
-            <p className="text-sm text-muted-foreground">
-              Já tem conta?{" "}
-              <Link href="/login" className="text-foreground underline underline-offset-4">
-                Entrar
-              </Link>
-            </p>
-          </CardFooter>
-        </form>
-      </Card>
-    </main>
+    <AuthShell title="Criar conta" description="Cadastre-se para acessar o BetHub">
+      <form onSubmit={handleSubmit} className="mt-7 space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="fullName" className="text-[13px] text-foreground/80">
+            Nome completo
+          </Label>
+          <Input
+            id="fullName"
+            autoComplete="name"
+            placeholder="Seu nome"
+            required
+            minLength={2}
+            value={fullName}
+            onChange={(e) => setFullName(e.target.value)}
+            disabled={loading}
+            className={authFieldClassName}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="email" className="text-[13px] text-foreground/80">
+            E-mail
+          </Label>
+          <Input
+            id="email"
+            type="email"
+            inputMode="email"
+            autoComplete="email"
+            placeholder="voce@exemplo.com"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            disabled={loading}
+            className={authFieldClassName}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="password" className="text-[13px] text-foreground/80">
+            Senha
+          </Label>
+          <Input
+            id="password"
+            type="password"
+            autoComplete="new-password"
+            required
+            minLength={8}
+            placeholder="Mínimo de 8 caracteres"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            disabled={loading}
+            className={authFieldClassName}
+          />
+        </div>
+
+        {error && (
+          <p role="alert" className="text-sm text-loss">
+            {error}
+          </p>
+        )}
+
+        <Button type="submit" size="lg" className="w-full" disabled={loading}>
+          {loading ? (
+            <>
+              <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+              Criando conta
+            </>
+          ) : (
+            <>
+              Criar conta
+              <ArrowRight className="size-4" aria-hidden="true" />
+            </>
+          )}
+        </Button>
+      </form>
+
+      <p className="mt-6 border-t border-foreground/[0.07] pt-5 text-center text-[13px] text-muted-foreground">
+        Já tem conta?{" "}
+        <Link
+          href="/login"
+          className="font-medium text-primary underline-offset-4 transition-colors hover:underline dark:text-brand-bright"
+        >
+          Entrar
+        </Link>
+      </p>
+    </AuthShell>
   )
 }

@@ -220,7 +220,6 @@
   [data-slot="tabs-content"], [data-slot="card"], [data-slot="card-content"] { min-width: 0; }
   [data-slot="tabs-list"] { max-width: 100%; overflow-x: auto; justify-content: flex-start; }
   [data-slot="tabs-trigger"] { flex-shrink: 0; }
-  [data-slot="tabs-trigger"][data-state="active"] { background: var(--card); color: var(--primary); box-shadow: 0 1px 3px #0001; }
   .panel-glass { background: var(--surface-glass); border-color: var(--surface-glass-border); -webkit-backdrop-filter: blur(24px) saturate(1.1); backdrop-filter: blur(24px) saturate(1.1); }
   .chip-numeric { display: inline-flex; border: 1px solid var(--surface-glass-border); border-radius: 6px; background: color-mix(in oklab, var(--foreground) 3%, transparent); padding: 1px 6px; font-family: var(--font-roboto-mono), monospace; font-variant-numeric: tabular-nums lining-nums; }
   /* Grade estática do app: mesma família do KineticGrid, em células menores e mais

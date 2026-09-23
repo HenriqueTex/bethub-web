@@ -6,6 +6,13 @@ O welcome e o login definem a identidade visual do BetHub. O resto do app ficou 
 
 Trata-se de **extensão de um mundo visual existente**, não de redesign. O welcome/login é a referência e não muda de identidade. Continuam intactos o conteúdo, as funcionalidades, os fluxos, os cálculos e os textos das telas internas.
 
+## Status
+
+- [x] Fase 0: tokens, grade estática, DESIGN.md
+- [x] Fase 1: componentes base, shell, KineticGrid com tema (com fallback), welcome/login com tema, cadastro no `AuthShell`
+- [ ] Fase 2: telas principais
+- [ ] Fase 3: telas auxiliares e fechamento
+
 ## Decisões tomadas
 
 | Tema | Decisão |

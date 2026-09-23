@@ -13,7 +13,7 @@ O welcome e o login definem a linguagem, e o restante do app a estende:
 
 `src/app/globals.css` é a fonte de verdade. Código novo não usa hexadecimal, `rgba()` nem `white/…` nos componentes: tudo vem dos tokens abaixo, inclusive gráficos, canvas, estados, menus e toasts.
 
-O alinhamento das telas a esta linguagem acontece em fases, conforme `docs/PLAN-alinhamento-visual.md`. A Fase 0 (tokens, grade e este documento) está aplicada. Onde um componente ainda não segue o sistema, a seção "Componentes" indica o estado atual e o destino.
+O alinhamento das telas a esta linguagem acontece em fases, conforme `docs/PLAN-alinhamento-visual.md`. As Fases 0 (tokens, grade e este documento) e 1 (componentes base, shell e telas públicas) estão aplicadas. As telas internas (Fases 2 e 3) ainda usam parte da composição antiga.
 
 ## Tokens
 
@@ -71,21 +71,20 @@ Texto verde sobre fundo claro usa `primary`, porque `brand-bright` não chega a 
 | `--app-grid-node-alpha` | 0,07 | 0,06 |
 
 - **No app autenticado:** `.grid-backdrop`, com célula de 32px e ponto nas interseções. É mais densa e mais apagada que a grade do login, para não competir com tabelas e números. É estática e sem canvas, fica fixa atrás do conteúdo e é colocada em `app/(app)/layout.tsx`.
-- **No welcome e no login:** o `KineticGrid` (canvas interativo). Hoje ele ainda tem as cores fixas no código. A Fase 1 passa a ler os tokens acima, com fallback para valores padrão caso as variáveis não estejam disponíveis.
+- **No welcome e no login:** o `KineticGrid` (canvas interativo). Ele lê os tokens acima e os relê sempre que a classe ou o estilo do `<html>` mudam, acompanhando a troca de tema ao vivo. Se uma variável estiver ausente ou inválida, cada cor cai no padrão do tema escuro, em vez de gerar uma cor inválida no canvas.
 
 ## Componentes
 
-| Componente | Estado atual | Destino (Fase 1) |
-| --- | --- | --- |
-| Button | shadcn, 36px, `rounded-lg` | `default` com `shadow-primary` e hover `brand-bright`; `outline`/`ghost` no estilo secundário do login; `lg` de 44px com `rounded-control` |
-| Input, Textarea, SelectTrigger | 36px, `rounded-lg` | `rounded-control-sm`, placeholder `text-placeholder`; 44px nos formulários principais |
-| Card | `rounded-xl`, sem sombra | `rounded-panel` + `shadow-panel`, opaco; variante de vidro para destaques |
-| Dialog, Sheet, Popover, Dropdown, Select | opacos, `rounded-lg`/`xl` | `panel-glass`, `rounded-panel` / `rounded-menu`, `shadow-panel` |
-| Tabs | trilho `bg-muted`, aba ativa com override em `globals.css` | trilho e aba ativa em pílula com borda de vidro |
-| Table | cabeçalho `text-xs` | microrrótulo (11px, maiúsculas, tracking de 0,06em); odds em `chip-numeric` |
-| ResultBadge | badge com cor sólida (Green/Red) ou tingida | pílula com ponto colorido + texto |
-| Shell | sidebar opaca, texto "BetHub" | sidebar e cabeçalho mobile em vidro, BrandMark, item ativo em pílula |
-| Welcome, login, cadastro | sempre escuros; cadastro no card antigo | seguem o tema; cadastro no mesmo layout do login |
+- **Button:** o `default` é verde com `shadow-primary` e hover `brand-bright`. `outline` usa fundo de 3% e borda de vidro, e `ghost` tem hover de 6%. `lg` = 44px com `rounded-control`. O toque encolhe o botão para 98% (transform, 150ms).
+- **Input, Textarea, SelectTrigger:** `rounded-control-sm`, `bg-field`, borda `input`, placeholder `text-placeholder` e anel verde no foco. 36px por padrão; formulários principais e telas de autenticação usam 44px (`authFieldClassName`).
+- **Card:** `rounded-panel` + `shadow-panel`, opaco por padrão; `variant="glass"` para destaques.
+- **Dialog, Sheet, Popover, Dropdown, Select (conteúdo):** `panel-glass` com `shadow-panel`. Dialog com `rounded-panel`, menus com `rounded-menu`. Entrada com leve escala em 150–200ms e saída mais rápida.
+- **Tabs:** trilho em pílula com borda de vidro; a aba ativa é uma pílula `bg-card` com borda.
+- **Table:** cabeçalho em microrrótulo (11px, maiúsculas, tracking de 0,06em), divisórias de 7%, hover de 2,5%. Odds em `chip-numeric`.
+- **ResultBadge:** pílula com ponto colorido e texto. Resultados "half" têm contorno sem preenchimento; Void e Cashout são neutros. Nunca depende só da cor.
+- **BrandMark:** ícone em quadrado de 10px de raio e "BetHub". Aparece no shell do app; as telas de autenticação não o exibem. `compact` esconde a palavra visualmente, mas mantém o texto para leitores de tela.
+- **Shell:** sidebar e cabeçalho mobile em `panel-glass` sobre a grade. O cabeçalho mobile respeita `safe-area-inset-top`. O item ativo é uma pílula `primary/10` com anel `primary/25` e ícone verde. A tela de carregamento mostra a grade e o BrandMark.
+- **AuthShell:** layout compartilhado entre login e cadastro (KineticGrid, cabeçalho só com o seletor de tema, painel de vidro de 420px, halo). Welcome, login e cadastro seguem o tema escolhido.
 
 ## Tipografia e números
 

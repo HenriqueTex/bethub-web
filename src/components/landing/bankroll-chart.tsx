@@ -48,7 +48,7 @@ export function BankrollChart() {
   return (
     <figure className="m-0">
       <figcaption className="mb-2 flex items-baseline justify-between">
-        <span className="text-[11.5px] font-medium text-white/55">Evolução da banca</span>
+        <span className="text-[11.5px] font-medium text-muted-foreground">Evolução da banca</span>
         <span className="numeric text-[11.5px] font-medium text-profit">
           R$ 4.000 → R$ 5.240
         </span>
@@ -62,8 +62,8 @@ export function BankrollChart() {
       >
         <defs>
           <linearGradient id="bankroll-area" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#22c55e" stopOpacity="0.28" />
-            <stop offset="100%" stopColor="#22c55e" stopOpacity="0" />
+            <stop offset="0%" stopColor="var(--primary)" stopOpacity="0.28" />
+            <stop offset="100%" stopColor="var(--primary)" stopOpacity="0" />
           </linearGradient>
         </defs>
 
@@ -71,18 +71,18 @@ export function BankrollChart() {
         <path
           d={linePath}
           fill="none"
-          stroke="#22c55e"
+          stroke="var(--primary)"
           strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
           className="draw-line"
           style={{ ["--line-length" as string]: approxLength }}
         />
-        <circle cx={last.x} cy={last.y} r="7" fill="#22c55e" opacity="0.18" />
-        <circle cx={last.x} cy={last.y} r="3" fill="#4ade80" />
+        <circle cx={last.x} cy={last.y} r="7" fill="var(--primary)" opacity="0.18" />
+        <circle cx={last.x} cy={last.y} r="3" fill="var(--brand-bright)" />
       </svg>
 
-      <ul className="numeric mt-2 flex justify-between px-1 text-[10px] font-medium tracking-[0.06em] text-white/40">
+      <ul className="numeric mt-2 flex justify-between px-1 text-[10px] font-medium tracking-[0.06em] text-muted-foreground">
         {LABELS.map((label) => (
           <li key={label}>{label}</li>
         ))}

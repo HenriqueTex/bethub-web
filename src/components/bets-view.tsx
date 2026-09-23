@@ -1071,7 +1071,7 @@ function SurebetCreateForm({
     .slice(0, 1000)
 
   return (
-    <form onSubmit={onSubmit} className="rounded-lg border bg-card p-4 shadow-sm">
+    <form onSubmit={onSubmit} className="rounded-panel border bg-card p-4 shadow-panel sm:p-5">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 className="text-lg font-semibold">Nova surebet</h2>
@@ -1846,7 +1846,7 @@ export default function BetsView({
       {statsSlot}
       {inlineCreateForm && <h2 className="text-lg font-semibold">Apostas registradas</h2>}
 
-      <div className="bet-filters flex flex-wrap items-end gap-3 rounded-lg border bg-card p-4">
+      <div className="bet-filters flex flex-wrap items-end gap-3 rounded-panel border bg-card p-4 shadow-panel">
         <Input
           placeholder="Buscar evento, seleção..."
           className="w-52"
@@ -1943,7 +1943,7 @@ export default function BetsView({
         )}
       </div>
 
-      <div className="rounded-lg border bg-card">
+      <div className="overflow-hidden rounded-panel border bg-card shadow-panel">
         <Table>
           <TableHeader>
             <TableRow>
@@ -1991,7 +1991,9 @@ export default function BetsView({
                   <TableCell className="text-muted-foreground">
                     {bet.tipster?.name ?? "—"}
                   </TableCell>
-                  <TableCell className="text-right">{formatOdd(bet.odd)}</TableCell>
+                  <TableCell className="text-right">
+                    <span className="chip-numeric">{formatOdd(bet.odd)}</span>
+                  </TableCell>
                   <TableCell className="text-right">
                     <p>{formatUnits(bet.units)}</p>
                     <p className="text-xs text-muted-foreground">{formatBRL(bet.stakeAmount)}</p>

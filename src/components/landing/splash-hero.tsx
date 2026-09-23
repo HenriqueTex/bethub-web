@@ -15,17 +15,17 @@ export function SplashHero({
       <div className="mx-auto grid w-full max-w-[1200px] grid-cols-1 items-center gap-12 px-5 py-12 sm:px-8 sm:py-16 lg:grid-cols-[minmax(0,1fr)_minmax(0,460px)] lg:gap-16 lg:py-10">
         <div className="max-w-xl">
           <h1
-            className="rise text-[38px] leading-[1.06] font-semibold tracking-tight text-balance text-white sm:text-[48px] lg:text-[60px] xl:text-[68px]"
+            className="rise text-[38px] leading-[1.06] font-semibold tracking-tight text-balance text-foreground sm:text-[48px] lg:text-[60px] xl:text-[68px]"
             style={{ animationDelay: "60ms" }}
           >
             Sua banca merece{" "}
-            <span className="bg-gradient-to-br from-white via-white to-[#4ade80] bg-clip-text text-transparent">
+            <span className="bg-gradient-to-br from-foreground via-foreground to-brand-bright bg-clip-text text-transparent">
               mais que uma planilha.
             </span>
           </h1>
 
           <p
-            className="rise mt-6 max-w-[34rem] text-[15px] leading-relaxed text-white/60 sm:text-base"
+            className="rise mt-6 max-w-[34rem] text-[15px] leading-relaxed text-muted-foreground sm:text-base"
             style={{ animationDelay: "160ms" }}
           >
             Registre suas apostas, acompanhe seus resultados e transforme seu histórico em
@@ -38,7 +38,7 @@ export function SplashHero({
           >
             <Button
               onClick={onStart}
-              className="h-11 rounded-[17px] px-5 text-sm font-medium shadow-[0_0_0_1px_rgba(34,197,94,0.35),0_16px_40px_-18px_rgba(34,197,94,0.75)] hover:bg-brand-bright"
+              className="h-11 rounded-control px-5 text-sm font-medium shadow-primary hover:bg-brand-bright"
             >
               Começar agora
               <ArrowRight className="size-4" aria-hidden="true" />
@@ -46,7 +46,7 @@ export function SplashHero({
 
             <Button
               variant="outline"
-              className="h-11 rounded-[17px] border-white/12 bg-white/[0.03] px-5 text-sm font-medium text-white hover:border-white/20 hover:bg-white/[0.07] hover:text-white"
+              className="h-11 rounded-control border-glass-border bg-foreground/[0.03] px-5 text-sm font-medium text-foreground hover:border-foreground/20 hover:bg-foreground/[0.07] hover:text-foreground"
             >
               <PlayCircle className="size-4" aria-hidden="true" />
               Ver demonstração
@@ -54,7 +54,7 @@ export function SplashHero({
           </div>
 
           <p
-            className="rise mt-6 text-[11.5px] tracking-[0.04em] text-white/40"
+            className="rise mt-6 text-[11.5px] tracking-[0.04em] text-muted-foreground"
             style={{ animationDelay: "360ms" }}
           >
             Controle • Histórico • ROI • Yield • Gestão de banca
