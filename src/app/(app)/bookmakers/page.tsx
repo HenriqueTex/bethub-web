@@ -94,16 +94,23 @@ export default function BookmakersPage() {
   const filtered = useMemo(() => {
     const term = search.trim().toLowerCase()
 
-    return bookmakers.filter((bookmaker) => {
-      if (term && !bookmaker.name.toLowerCase().includes(term)) return false
+    return bookmakers
+      .filter((bookmaker) => {
+        if (term && !bookmaker.name.toLowerCase().includes(term)) return false
 
-      const accounts = bookmaker.accounts?.length ?? 0
-      if (status === "with") return accounts > 0
-      if (status === "without") return accounts === 0
-      if (status === "inactive") return !bookmaker.active
+        const accounts = bookmaker.accounts?.length ?? 0
+        if (status === "with") return accounts > 0
+        if (status === "without") return accounts === 0
+        if (status === "inactive") return !bookmaker.active
 
-      return true
-    })
+        return true
+      })
+      .sort(
+        (a, b) =>
+          Number(b.active) - Number(a.active) ||
+          (b.totalBalance ?? 0) - (a.totalBalance ?? 0) ||
+          a.name.localeCompare(b.name, "pt-BR")
+      )
   }, [bookmakers, search, status])
 
   async function openTransactions(account: Account) {

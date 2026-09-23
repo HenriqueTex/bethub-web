@@ -72,6 +72,7 @@ import { PunterCreateForm } from "@/components/punter-create-form"
 import { emptyCarryOver, type PunterCarryOver } from "@/lib/punter-draft"
 import { ResultBadge } from "@/components/result-badge"
 import { PageHeader } from "@/components/page-header"
+import { accountName, byUsage } from "@/lib/usage"
 import { formatBRL, formatDate, formatOdd, formatSigned, formatPercent, formatUnits, RESULT_LABELS } from "@/lib/format"
 import { cn } from "@/lib/utils"
 import {
@@ -1683,8 +1684,8 @@ export default function BetsView({
       resources.settings.get(),
     ])
       .then(([accountsData, tipstersData, methodsData, marketsData, settings]) => {
-        setAccounts(accountsData)
-        setTipsters(tipstersData)
+        setAccounts([...accountsData].sort(byUsage<Account>(accountName)))
+        setTipsters([...tipstersData].sort(byUsage<Tipster>((tipster) => tipster.name)))
         setMethods(methodsData)
         setMarkets(marketsData)
         setUnitValue(settings.unitValue)

@@ -37,6 +37,8 @@ export interface Account {
   active: boolean
   bookmaker?: Bookmaker
   balance?: AccountBalance
+  betCount?: number
+  lastBetAt?: string | null
 }
 
 export interface Transaction {
@@ -54,6 +56,8 @@ export interface Tipster {
   channel: string | null
   notes: string | null
   active: boolean
+  betCount?: number
+  lastBetAt?: string | null
 }
 
 export interface Method {
