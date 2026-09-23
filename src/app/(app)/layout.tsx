@@ -126,6 +126,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-dvh">
+      <div aria-hidden="true" className="grid-backdrop fixed inset-0 -z-10" />
       <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:rounded-md focus:bg-primary focus:p-3 focus:text-primary-foreground">Pular para o conteúdo</a>
       <aside
         id="desktop-sidebar"
@@ -225,7 +226,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
         id="main-content"
         tabIndex={-1}
         className={cn(
-          "min-h-dvh min-w-0 bg-background p-4 sm:p-6 lg:p-8",
+          "min-h-dvh min-w-0 p-4 sm:p-6 lg:p-8",
           collapsed ? "md:ml-16" : "md:ml-60"
         )}
       >

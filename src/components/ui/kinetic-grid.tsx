@@ -23,7 +23,7 @@ const INFLUENCE_RADIUS = 260;
 const MAX_WARP = 22;
 const DOT_SPACING = 30;
 const COMPACT_BREAKPOINT = 768;
-const RIPPLE_SPEED = 320;
+const RIPPLE_SPEED = 800;
 const LERP_SPEED = 0.08;
 
 const LINE_BASE = { r: 255, g: 255, b: 255, a: 0.055 };
