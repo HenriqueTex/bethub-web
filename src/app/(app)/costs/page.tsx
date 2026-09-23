@@ -166,7 +166,6 @@ export default function CostsPage() {
         <KpiCard
           label="Custo no mês"
           tone="loss"
-          trend={false}
           value={formatBRL(summary?.total ?? 0)}
           detail={`${period.from.split("-").reverse().join("/")} a ${period.to.split("-").reverse().join("/")}`}
         />

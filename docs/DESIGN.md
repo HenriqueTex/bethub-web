@@ -82,10 +82,11 @@ Texto verde sobre fundo claro usa `primary`, porque `brand-bright` não chega a 
 - **Tabs:** trilho em pílula com borda de vidro; a aba ativa é uma pílula `bg-card` com borda.
 - **Table:** cabeçalho em microrrótulo (11px, maiúsculas, tracking de 0,06em), divisórias de 7%, hover de 2,5%. Odds em `chip-numeric`.
 - **ResultBadge:** pílula com ponto colorido e texto. Resultados "half" têm contorno sem preenchimento; Void e Cashout são neutros. Nunca depende só da cor.
-- **BrandMark:** ícone em quadrado de 10px de raio e "BetHub". Aparece no shell do app; as telas de autenticação não o exibem. `compact` esconde a palavra visualmente, mas mantém o texto para leitores de tela.
+- **BrandMark:** só o texto "BetHub" (20px, semibold, tracking apertado), com "Bet" em verde. Aparece na sidebar, no cabeçalho mobile, na gaveta de navegação e na tela de carregamento; as telas de autenticação não o exibem.
+- **Ícone do app** (`public/icon.svg`, PNGs de 192/512, maskable de 512, `apple-icon.png` de 180 e `src/app/favicon.ico`): quadrado `#0b0d0c` com halo e borda verdes e duas velas preenchidas. As velas substituem o gráfico de traço fino, que não se lia em 16px.
 - **Shell:** sidebar e cabeçalho mobile em `panel-glass` sobre a grade. O cabeçalho mobile respeita `safe-area-inset-top`. O item ativo é uma pílula `primary/10` com anel `primary/25` e ícone verde. A tela de carregamento mostra a grade e o BrandMark.
 - **PageHeader:** título de 26–28px semibold com tracking apertado, descrição opcional de 13,5px e área de ações à direita (quebra de linha no mobile). Sem eyebrow.
-- **KpiCard:** painel opaco com microrrótulo, valor em Roboto Mono (18px no mobile, 20px a partir de 640px) e linha de detalhe. `tone="profit" | "loss"` colore o valor e mostra o ícone de tendência; zero é neutro.
+- **KpiCard:** painel opaco com microrrótulo, valor em Roboto Mono (18px no mobile, 20px a partir de 640px) e linha de detalhe. `tone` (`profit`, `loss`, `warning`) colore o valor, sem ícone de tendência; lucro zero é neutro.
 - **Formulários principais** ("Nova aposta" e calculadora de surebet): `panel-glass` com halo verde atrás, entrada `rise-panel` (300ms) e botão de registrar em `size="lg"`. No Punter, `.form-main` dá `rounded-control` a inputs e selects de 44px. Conta e tipster usam o Select do sistema, com `<input type="hidden">` levando o valor ao FormData; a conta é validada no envio, com mensagem e foco no campo.
 - **Lista de apostas:** tabela a partir de 768px. Abaixo disso, lista no formato "Últimas apostas" do preview: ponto de resultado, seleção, evento, data · casa · stake, odd em chip, lucro, badge e as mesmas ações.
 - **Gráfico de lucro acumulado:** moldura interna de vidro, eixos em Roboto Mono de 11px, ponto final destacado e resumo "início → atual" no cabeçalho.
@@ -93,7 +94,7 @@ Texto verde sobre fundo claro usa `primary`, porque `brand-bright` não chega a 
 - **EmptyState:** ícone em círculo com borda de vidro, título, descrição opcional e ação. Usado em Casas & Contas, Freebets, Tipsters e Custos, dentro do painel da lista.
 - **Tema em Configurações:** grupo segmentado Claro / Escuro / Sistema (rádios nativos, com setas do teclado). O menu compacto "Aparência" continua na sidebar e no cabeçalho.
 - **Toasts (Sonner):** fundo e borda de vidro, raio de 16px, `shadow-panel`. Sucesso, erro e aviso usam `profit`, `loss` e `warning` misturados ao fundo.
-- **Telas auxiliares:** `PageHeader` e `KpiCard` como nas principais (Freebets em `warning`, Custos em `loss` sem seta de tendência). Tabelas em painel opaco `rounded-panel`. Em Casas & Contas, o logo fica numa moldura de 10px e o saldo total aparece como microrrótulo + valor mono.
+- **Telas auxiliares:** `PageHeader` e `KpiCard` como nas principais (Freebets em `warning`, Custos em `loss`). Tabelas em painel opaco `rounded-panel`. Em Casas & Contas, o logo fica numa moldura de 10px e o saldo total aparece como microrrótulo + valor mono.
 - **AuthShell:** layout compartilhado entre login e cadastro (KineticGrid, cabeçalho só com o seletor de tema, painel de vidro de 420px, halo). Welcome, login e cadastro seguem o tema escolhido.
 
 ## Tipografia e números

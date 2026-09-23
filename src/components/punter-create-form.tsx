@@ -497,7 +497,7 @@ export function PunterCreateForm({
                     name="eventDate"
                     type="datetime-local"
                     className={cn(
-                      "h-11 min-w-0 flex-1 sm:max-w-56",
+                      "h-11 min-w-0 flex-1",
                       draft.imported.eventDate && "ai-field"
                     )}
                     value={fields.eventDate}
@@ -518,10 +518,8 @@ export function PunterCreateForm({
                         : "Sem aviso para este jogo"
                     }
                     className={cn(
-                      "flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border transition-colors",
-                      notificar
-                        ? "border-ring bg-field text-foreground"
-                        : "border-input bg-field text-muted-foreground hover:text-foreground"
+                      "flex size-11 shrink-0 items-center justify-center rounded-full transition-[color,transform] duration-150 outline-none focus-visible:ring-3 focus-visible:ring-ring/50 active:scale-90",
+                      notificar ? "text-warning" : "text-muted-foreground hover:text-foreground"
                     )}
                   >
                     <Bell className="size-5" fill={notificar ? "currentColor" : "none"} />

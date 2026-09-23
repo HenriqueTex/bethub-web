@@ -18,7 +18,13 @@ export const metadata: Metadata = {
   description: "Controlador pessoal de apostas",
   manifest: "/manifest.webmanifest",
   appleWebApp: { capable: true, title: "BetHub", statusBarStyle: "black-translucent" },
-  icons: { icon: "/icon-192.png", apple: "/icon-192.png" },
+  icons: {
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+    ],
+    apple: { url: "/apple-icon.png", sizes: "180x180" },
+  },
 };
 
 export default function RootLayout({
