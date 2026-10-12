@@ -11,7 +11,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { rippleSweep } from "@/components/ui/kinetic-grid"
-import { ApiError, devLogin, login } from "@/lib/api"
+import { ApiError, devLogin, login, resendActivation } from "@/lib/api"
 import { cn } from "@/lib/utils"
 import { markWelcomeSeen } from "@/lib/welcome"
 
@@ -38,6 +38,8 @@ export function LoginScreen({ showWelcome = false }: { showWelcome?: boolean }) 
   const [error, setError] = useState<string | null>(null)
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({})
   const [loading, setLoading] = useState(false)
+  const [canResend, setCanResend] = useState(false)
+  const [resendNotice, setResendNotice] = useState<string | null>(null)
   const [phase, setPhase] = useState<Phase>(showWelcome ? "welcome" : "done")
   const revealRef = useRef<HTMLDivElement>(null)
   const revealAnimation = useRef<Animation | null>(null)
@@ -83,6 +85,8 @@ export function LoginScreen({ showWelcome = false }: { showWelcome?: boolean }) 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault()
     setError(null)
+    setCanResend(false)
+    setResendNotice(null)
 
     const found = validate()
     setFieldErrors(found)
@@ -93,11 +97,27 @@ export function LoginScreen({ showWelcome = false }: { showWelcome?: boolean }) 
       await login(email, password)
       router.push("/punter")
     } catch (err) {
-      setError(
-        err instanceof ApiError && err.status === 400
-          ? "E-mail ou senha inválidos"
-          : "Não foi possível entrar. Tente novamente."
-      )
+      if (err instanceof ApiError && err.status === 400) {
+        setError("E-mail ou senha inválidos")
+      } else if (err instanceof ApiError && err.status === 403) {
+        setError(err.message)
+        setCanResend(err.code === "ACCOUNT_NOT_ACTIVATED")
+      } else {
+        setError("Não foi possível entrar. Tente novamente.")
+      }
+      setLoading(false)
+    }
+  }
+
+  async function handleResend() {
+    setLoading(true)
+    try {
+      const { message } = await resendActivation(email)
+      setResendNotice(message)
+      setCanResend(false)
+    } catch {
+      setResendNotice("Não foi possível reenviar agora. Tente novamente em instantes.")
+    } finally {
       setLoading(false)
     }
   }
@@ -233,6 +253,23 @@ export function LoginScreen({ showWelcome = false }: { showWelcome?: boolean }) 
             {error && (
               <p role="alert" className="text-sm text-loss">
                 {error}
+              </p>
+            )}
+
+            {canResend && (
+              <button
+                type="button"
+                onClick={handleResend}
+                disabled={loading}
+                className="text-[13px] font-medium text-primary underline-offset-4 hover:underline disabled:opacity-60 dark:text-brand-bright"
+              >
+                Reenviar link de ativação
+              </button>
+            )}
+
+            {resendNotice && (
+              <p role="status" className="text-[13px] text-muted-foreground">
+                {resendNotice}
               </p>
             )}
 
