@@ -24,17 +24,31 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { resources, Tipster } from "@/lib/resources"
+import { resources, StatsRow, Tipster } from "@/lib/resources"
+import { formatPercent, formatSigned } from "@/lib/format"
+import { cn } from "@/lib/utils"
 
 export default function TipstersPage() {
   const [tipsters, setTipsters] = useState<Tipster[]>([])
+  const [results, setResults] = useState<Map<number, StatsRow>>(new Map())
   const [loading, setLoading] = useState(true)
   const [open, setOpen] = useState(false)
   const [editing, setEditing] = useState<Tipster | null>(null)
   const [saving, setSaving] = useState(false)
 
   async function reload() {
-    setTipsters(await resources.tipsters.list())
+    const [tipstersData, statsRows] = await Promise.all([
+      resources.tipsters.list(),
+      resources.stats.by("tipster").catch(() => [] as StatsRow[]),
+    ])
+    setTipsters(tipstersData)
+    setResults(
+      new Map(
+        statsRows
+          .filter((row) => row.key !== null)
+          .map((row) => [Number(row.key), row] as const)
+      )
+    )
     setLoading(false)
   }
 
@@ -139,19 +153,20 @@ export default function TipstersPage() {
               <TableHead>Nome</TableHead>
               <TableHead>Canal</TableHead>
               <TableHead>Status</TableHead>
+              <TableHead className="text-right">Resultado geral</TableHead>
               <TableHead className="w-24" />
             </TableRow>
           </TableHeader>
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={4} className="text-center text-muted-foreground">
+                <TableCell colSpan={5} className="text-center text-muted-foreground">
                   Carregando...
                 </TableCell>
               </TableRow>
             ) : tipsters.length === 0 ? (
               <TableRow className="hover:bg-transparent">
-                <TableCell colSpan={4} className="p-0">
+                <TableCell colSpan={5} className="p-0">
                   <EmptyState
                     icon={Megaphone}
                     title="Nenhum tipster cadastrado"
@@ -179,6 +194,9 @@ export default function TipstersPage() {
                     <Badge variant={tipster.active ? "outline" : "secondary"}>
                       {tipster.active ? "Ativo" : "Inativo"}
                     </Badge>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <TipsterResult row={results.get(tipster.id)} />
                   </TableCell>
                   <TableCell>
                     <div className="flex gap-1">
@@ -211,6 +229,29 @@ export default function TipstersPage() {
           </TableBody>
         </Table>
       </div>
+    </div>
+  )
+}
+
+const toneOf = (value: number) =>
+  value > 0 ? "text-profit" : value < 0 ? "text-loss" : "text-muted-foreground"
+
+function TipsterResult({ row }: { row?: StatsRow }) {
+  if (!row || row.totalBets === 0) {
+    return <span className="text-muted-foreground">—</span>
+  }
+  const cost = row.cost ?? 0
+  return (
+    <div>
+      <p className={cn("numeric font-medium", toneOf(row.profit))}>{formatSigned(row.profit)}</p>
+      <p className="text-xs text-muted-foreground">
+        {row.totalBets} {row.totalBets === 1 ? "aposta" : "apostas"} · ROI {formatPercent(row.roi)}
+      </p>
+      {cost > 0 && row.netProfit !== undefined && (
+        <p className={cn("text-xs", toneOf(row.netProfit))}>
+          Líquido de custos {formatSigned(row.netProfit)}
+        </p>
+      )}
     </div>
   )
 }

@@ -1603,6 +1603,9 @@ const RESULT_DOT: Record<Bet["result"], string> = {
   cashout: "border-glass-border [&>span]:bg-foreground/60",
 }
 
+// Radix Select não aceita "" como valor de item, então "sem tipster" usa um sentinela.
+const NO_TIPSTER = "none"
+
 export default function BetsView({
   lockedMethod,
   title = "Apostas",
@@ -1787,6 +1790,19 @@ export default function BetsView({
       onDataChanged?.()
     } catch {
       toast.error("Não foi possível liquidar")
+    }
+  }
+
+  async function changeTipster(bet: Bet, value: string) {
+    const tipsterId = value === NO_TIPSTER ? null : Number(value)
+    if (tipsterId === (bet.tipsterId ?? null)) return
+    try {
+      await resources.bets.update(bet.id, { tipsterId })
+      toast.success("Tipster atualizado")
+      await reloadBets()
+      onDataChanged?.()
+    } catch {
+      toast.error("Não foi possível alterar o tipster")
     }
   }
 
@@ -2118,7 +2134,28 @@ export default function BetsView({
                       {bet.account?.bookmaker?.name ?? "—"}
                     </TableCell>
                     <TableCell className="text-muted-foreground">
-                      {bet.tipster?.name ?? "—"}
+                      <Select
+                        value={bet.tipsterId ? String(bet.tipsterId) : NO_TIPSTER}
+                        onValueChange={(value) => changeTipster(bet, value)}
+                      >
+                        <SelectTrigger
+                          size="sm"
+                          aria-label={`Tipster de ${bet.selection}`}
+                          className="max-w-36 border-transparent bg-transparent text-muted-foreground hover:border-input"
+                        >
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value={NO_TIPSTER}>—</SelectItem>
+                          {tipsters
+                            .filter((tipster) => tipster.active || tipster.id === bet.tipsterId)
+                            .map((tipster) => (
+                              <SelectItem key={tipster.id} value={String(tipster.id)}>
+                                {tipster.name}
+                              </SelectItem>
+                            ))}
+                        </SelectContent>
+                      </Select>
                     </TableCell>
                     <TableCell className="text-right">
                       <span className="chip-numeric">{formatOdd(bet.odd)}</span>
