@@ -14,6 +14,7 @@ export interface AccountBalance {
   deposits: number
   withdrawals: number
   profit: number
+  casinoProfit?: number
   extractedFreebets: number
   pendingFreebets: number
   balance: number
@@ -264,6 +265,65 @@ export interface GameOption {
   startsAt: string
 }
 
+export const CASINO_GAMES = [
+  "aviator",
+  "crash",
+  "roulette",
+  "slots",
+  "blackjack",
+  "baccarat",
+  "poker",
+  "game_show",
+  "other",
+] as const
+
+export type CasinoGame = (typeof CASINO_GAMES)[number]
+
+export const CASINO_KINDS = ["cash", "free_spins", "bonus"] as const
+
+export type CasinoKind = (typeof CASINO_KINDS)[number]
+
+export interface CasinoSession {
+  id: number
+  bookmakerAccountId: number
+  tipsterId: number | null
+  game: CasinoGame
+  title: string | null
+  kind: CasinoKind
+  stakeAmount: number
+  returnAmount: number | null
+  profitAmount: number | null
+  playedAt: string
+  notes: string | null
+  account?: Account
+  tipster?: Tipster | null
+}
+
+export interface CasinoAggregate {
+  sessions: number
+  openSessions: number
+  wins: number
+  losses: number
+  staked: number
+  returned: number
+  profit: number
+  roi: number
+  hitRate: number
+}
+
+export interface CasinoSummary extends CasinoAggregate {
+  byGame: (CasinoAggregate & { key: CasinoGame })[]
+  byAccount: (CasinoAggregate & { key: number; label: string })[]
+  byMonth: (CasinoAggregate & { key: string })[]
+}
+
+export type CasinoFilters = Partial<{
+  from: string
+  to: string
+  accountId: number | string
+  game: CasinoGame
+}>
+
 export const resources = {
   bookmakers: {
     list: () => apiFetch<Bookmaker[]>("/bookmakers"),
@@ -379,6 +439,23 @@ export const resources = {
         method: "PUT",
         body: JSON.stringify({ unitValue }),
       }),
+  },
+  casino: {
+    list: (filters: CasinoFilters = {}) =>
+      apiFetch<CasinoSession[]>(`/casino-sessions${buildQuery(filters)}`),
+    summary: (filters: CasinoFilters = {}) =>
+      apiFetch<CasinoSummary>(`/casino-sessions/summary${buildQuery(filters)}`),
+    create: (data: Record<string, unknown>) =>
+      apiFetch<CasinoSession>("/casino-sessions", {
+        method: "POST",
+        body: JSON.stringify(data),
+      }),
+    update: (id: number, data: Record<string, unknown>) =>
+      apiFetch<CasinoSession>(`/casino-sessions/${id}`, {
+        method: "PUT",
+        body: JSON.stringify(data),
+      }),
+    remove: (id: number) => apiFetch<void>(`/casino-sessions/${id}`, { method: "DELETE" }),
   },
   stats: {
     summary: (filters: BetFilters = {}) =>

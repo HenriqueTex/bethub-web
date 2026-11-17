@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation"
 import {
   ChartLine,
   ClipboardList,
+  Dices,
   Gift,
   Landmark,
   LogOut,
@@ -34,7 +35,8 @@ import { User, getToken, logout, me } from "@/lib/api"
 
 const MAIN_NAV = [
   { href: "/punter", label: "Punter", icon: TrendingUp },
-  { href: "/surebet", label: "Surebet", icon: Scale }
+  { href: "/surebet", label: "Surebet", icon: Scale },
+  { href: "/casino", label: "Cassino", icon: Dices }
 ]
 
 const NAV = [
